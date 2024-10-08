@@ -4,40 +4,45 @@ import { Chess } from "chess.js";
 import PropTypes from 'prop-types';
 
 
-const Board = ({ mainlines }) => {
+const Board = ({ mainlines, isWhite }) => {
   const chessRef = useRef(new Chess());
   const movesRef = useRef([]);
-  const currentIndexRef = useRef(-1);
+  const currMoveIdxRef = useRef(-1);
+  const maxMoveIdxRef = useRef(-1);
+  const lineIdxRef = useRef(0);
   const [currFen, setCurrFen] = useState('');
 
   // Load game history, set key tracking
-  const initializeGame = useCallback(() => {
-    if (!mainlines || mainlines.length === 0) return;
-    chessRef.current.loadPgn(mainlines[0]);
+  const loadNextGame = useCallback(() => {
+    if (!mainlines || mainlines.length === 0) {
+      chessRef.current.reset();
+      setCurrFen(chessRef.current.fen());
+      return;
+    };
+    chessRef.current.loadPgn(mainlines[lineIdxRef.current]);
     movesRef.current = chessRef.current.history();
     chessRef.current.reset();
     setCurrFen(chessRef.current.fen());
-  }, [mainlines]);
+  }, [mainlines, lineIdxRef]);
 
   const handleKeyDown = useCallback((event) => {
-    if (event.key === 'ArrowRight' && currentIndexRef.current < movesRef.current.length - 1) {
-      currentIndexRef.current++;
-      chessRef.current.move(movesRef.current[currentIndexRef.current]);
+    if (event.key === 'ArrowRight' && currMoveIdxRef.current < maxMoveIdxRef.current) {
+      currMoveIdxRef.current++;
+      chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
       setCurrFen(chessRef.current.fen());
-    } else if (event.key === 'ArrowLeft' && currentIndexRef.current >= 0) {
+    } else if (event.key === 'ArrowLeft' && currMoveIdxRef.current >= 0) {
       chessRef.current.undo();
-      currentIndexRef.current--;
+      currMoveIdxRef.current--;
       setCurrFen(chessRef.current.fen());
     }
   }, []);
 
   const onDrop = (sourceSquare, targetSquare) => {
     const chess = chessRef.current;
-    const currentIndex = currentIndexRef.current;
 
     // Check if there's a next move in the history
-    if (currentIndex < movesRef.current.length - 1) {
-      const nextMove = movesRef.current[currentIndex + 1];
+    if (currMoveIdxRef.current < movesRef.current.length - 1) {
+      const nextMove = movesRef.current[currMoveIdxRef.current + 1];
       const moveAttempt = chess.move({
         from: sourceSquare,
         to: targetSquare,
@@ -46,7 +51,8 @@ const Board = ({ mainlines }) => {
 
       if (moveAttempt && moveAttempt.san === nextMove) {
         // Move is correct
-        currentIndexRef.current++;
+        currMoveIdxRef.current++;
+        maxMoveIdxRef.current = Math.max(maxMoveIdxRef.current, currMoveIdxRef.current);
         setCurrFen(chess.fen());
         return true;
       } else {
@@ -56,7 +62,7 @@ const Board = ({ mainlines }) => {
           chess.undo();
           setCurrFen(chess.fen());
         }, 100);
-        return true; // allow move temporarily
+        return true; // allow move no matter what temporarily
       }
     }
 
@@ -65,12 +71,12 @@ const Board = ({ mainlines }) => {
   };
 
   useEffect(() => {
-    initializeGame();
+    loadNextGame();
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [initializeGame, handleKeyDown]);
+  }, [loadNextGame, handleKeyDown]);
 
   return (
     <Chessboard
@@ -79,6 +85,7 @@ const Board = ({ mainlines }) => {
       customDragLayers={[]}
       position={currFen}
       onPieceDrop={onDrop}
+      boardOrientation={isWhite ? 'white' : 'black'}
     />
   );
 };

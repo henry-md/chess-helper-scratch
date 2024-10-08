@@ -5,6 +5,7 @@ import Board from "./components/Board";
 function App() {
   const [textareaContent, setTextareaContent] = useState('');
   const [mainlines, setMainlines] = useState([]);
+  const [isPlayingWhite, setIsPlayingWhite] = useState(true);
 
   const handleTextareaChange = (event) => {
     if (event.target.value === '') return
@@ -54,14 +55,27 @@ function App() {
     <>
       <div className="w-full h-[100vh] flex justify-center items-center">
         <div className="w-[600px]">
-          <Board mainlines={mainlines}/>
+          <Board mainlines={mainlines} isWhite={isPlayingWhite}/>
         </div>
-        <textarea 
-          value={textareaContent}
-          onChange={handleTextareaChange}
-          className="ml-4 p-2 border border-gray-300 rounded h-[600px]"
-          placeholder="Type here..."
-        />
+        <div>
+          <textarea 
+            value={textareaContent}
+            onChange={handleTextareaChange}
+            className="ml-4 p-2 border border-gray-300 rounded h-[400px]"
+            placeholder="Type here..."
+          />
+          <div className="flex flex-row justify-center items-center gap-2">
+            Play as:
+            <button 
+              className={`w-[25px] h-[25px] bg-[#f0d9b5] rounded-md ${isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
+              onClick={() => setIsPlayingWhite(true)}
+            ></button>
+            <button 
+              className={`w-[25px] h-[25px] bg-[#b58863] rounded-md ${!isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
+              onClick={() => setIsPlayingWhite(false)}
+            ></button>
+          </div>
+        </div>
       </div>
     </>
   )
