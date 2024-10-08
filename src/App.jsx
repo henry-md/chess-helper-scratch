@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Board from "./components/Board";
-// import PgnGenerator from "./utils/PgnGenerator.js";
+import { Chess } from "chess.js";
 
 function App() {
   const [textareaContent, setTextareaContent] = useState('');
   const [mainlines, setMainlines] = useState([]);
   const [isPlayingWhite, setIsPlayingWhite] = useState(true);
+  const [currFen, setCurrFen] = useState('');
+
+  const chessRef = useRef(new Chess());
+  const movesRef = useRef([]);
+  const currMoveIdxRef = useRef(-1);
+  const maxMoveIdxRef = useRef(-1);
+  const lineIdxRef = useRef(0);
 
   const handleTextareaChange = (event) => {
     if (event.target.value === '') return
@@ -51,17 +58,122 @@ function App() {
     return mainlines.reverse();
   };
 
+  const loadNextGame = useCallback(() => {
+    if (!mainlines || mainlines.length === 0) {
+      chessRef.current.reset();
+      setCurrFen(chessRef.current.fen());
+      return;
+    };
+
+    chessRef.current.loadPgn(mainlines[lineIdxRef.current]);
+    movesRef.current = chessRef.current.history();
+    chessRef.current.reset();
+    setCurrFen(chessRef.current.fen());
+    currMoveIdxRef.current = -1;
+    maxMoveIdxRef.current = movesRef.current.length - 1;
+  }, [mainlines]);
+
+  const handleKeyDown = useCallback((event) => {
+    if (event.key === 'ArrowRight' && currMoveIdxRef.current < maxMoveIdxRef.current) {
+      currMoveIdxRef.current++;
+      chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
+      setCurrFen(chessRef.current.fen());
+    } else if (event.key === 'ArrowLeft' && currMoveIdxRef.current >= 0) {
+      chessRef.current.undo();
+      currMoveIdxRef.current--;
+      setCurrFen(chessRef.current.fen());
+    }
+  }, []);
+
+  const playComputerMove = () => {
+    setTimeout(() => {
+      if (currMoveIdxRef.current === movesRef.current.length - 1) return;
+      currMoveIdxRef.current++;
+      chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
+      setCurrFen(chessRef.current.fen());
+    }, 200);
+  };
+
+  const getHint = () => {
+    console.log('getHint');
+    console.log(currMoveIdxRef.current, movesRef.current.length - 1);
+    if (currMoveIdxRef.current === movesRef.current.length - 1) return;
+    console.log('getting here');
+    currMoveIdxRef.current++;
+    chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
+    setCurrFen(chessRef.current.fen());
+    setTimeout(() => {
+      chessRef.current.undo();
+      currMoveIdxRef.current--;
+      setCurrFen(chessRef.current.fen());
+    }, 500);
+  };
+
+  const onDrop = (sourceSquare, targetSquare) => {
+    const chess = chessRef.current;
+
+    if (currMoveIdxRef.current < movesRef.current.length - 1) {
+      const nextMove = movesRef.current[currMoveIdxRef.current + 1];
+      const moveAttempt = chess.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: 'q',
+      });
+
+      if (moveAttempt && moveAttempt.san === nextMove) {
+        currMoveIdxRef.current++;
+        maxMoveIdxRef.current = Math.max(maxMoveIdxRef.current, currMoveIdxRef.current);
+        setCurrFen(chess.fen());
+
+        if (currMoveIdxRef.current === movesRef.current.length - 1) {
+          lineIdxRef.current++;
+          loadNextGame();
+        } else {
+          playComputerMove();
+        }
+        return true;
+      } else {
+        setCurrFen(chess.fen());
+        setTimeout(() => {
+          chess.undo();
+          setCurrFen(chess.fen());
+        }, 100);
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    loadNextGame();
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [loadNextGame, handleKeyDown]);
+
   return (
     <>
       <div className="w-full h-[100vh] flex justify-center items-center">
         <div className="w-[600px]">
-          <Board mainlines={mainlines} isWhite={isPlayingWhite}/>
+          <Board 
+            currFen={currFen} 
+            onPieceDrop={onDrop}
+            isWhite={isPlayingWhite}
+          />
         </div>
-        <div>
+        <div className="flex flex-col justify-center items-center gap-2 px-3">
+          <button 
+            className="p-2 rounded w-full border border-gray-300 hover:bg-gray-100"
+            onClick={getHint}
+          >
+            Hint
+          </button>
           <textarea 
             value={textareaContent}
             onChange={handleTextareaChange}
-            className="ml-4 p-2 border border-gray-300 rounded h-[400px]"
+            className="p-2 border border-gray-300 rounded h-[400px]"
             placeholder="Type here..."
           />
           <div className="flex flex-row justify-center items-center gap-2">
@@ -78,7 +190,7 @@ function App() {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 export default App;
