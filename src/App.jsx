@@ -1,33 +1,20 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Board from "./components/Board";
 // import PgnGenerator from "./utils/PgnGenerator.js";
 
 function App() {
   const [textareaContent, setTextareaContent] = useState('');
+  const [mainlines, setMainlines] = useState([]);
 
   const handleTextareaChange = (event) => {
+    if (event.target.value === '') return
+    console.log('content', event.target.value);
     setTextareaContent(event.target.value);
+    setMainlines(pgnToMainlines(event.target.value));
+    console.log('mainlines', mainlines);
   };
 
-  /* turns a nested pgn into a set of mainline pgns.
-  Ex input:
-  1. e4 e5 
-  ( 1... d5 2. exd5 ) 
-  2. Nf3 Nc6 
-  ( 2... Nf6 3. Nxe5 ) 
-  3. Bb5 a6 4. Ba4 b5 
-  ( 4... Nf6 5. O-O Nxe4 6. Re1 ) 
-  5. Bb3 
-
-  Ex output:
-  [
-    "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 5. Bb3",
-    "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Nxe4 6. Re1",
-    "1. e4 e5 2. Nf3 Nf6 3. Nxe5",
-    "1. e4 d5 2. exd5"
-  ]
-  (the pgns can be returned in any order)
-  */
+  // turns a nested pgn into a set of mainline pgns.
   const pgnToMainlines = (pgn) => {
     const mainlines = [];
     const moves = pgn.split(/\s+/).filter(token => token.trim() !== '');
@@ -60,30 +47,19 @@ function App() {
     };
   
     backtrack(0, []);
-    return mainlines;
+    return mainlines.reverse();
   };
-  
-  // Test the function
-  const testPgn = `1. e4 e5 
-  ( 1... d5 2. exd5 ) 
-  2. Nf3 Nc6 
-  ( 2... Nf6 3. Nxe5 ) 
-  3. Bb5 a6 4. Ba4 b5 
-  ( 4... Nf6 5. O-O Nxe4 6. Re1 ) 
-  5. Bb3`;
-  
-  console.log(pgnToMainlines(testPgn));
 
   return (
     <>
       <div className="w-full h-[100vh] flex justify-center items-center">
         <div className="w-[600px]">
-          <Board pgn={"1. e4"}/>
+          <Board mainlines={mainlines}/>
         </div>
         <textarea 
           value={textareaContent}
           onChange={handleTextareaChange}
-          className="ml-4 p-2 border border-gray-300 rounded h-[300px]"
+          className="ml-4 p-2 border border-gray-300 rounded h-[600px]"
           placeholder="Type here..."
         />
       </div>

@@ -4,7 +4,7 @@ import { Chess } from "chess.js";
 import PropTypes from 'prop-types';
 
 
-const Board = ({ pgn }) => {
+const Board = ({ mainlines }) => {
   const chessRef = useRef(new Chess());
   const movesRef = useRef([]);
   const currentIndexRef = useRef(-1);
@@ -12,11 +12,12 @@ const Board = ({ pgn }) => {
 
   // Load game history, set key tracking
   const initializeGame = useCallback(() => {
-    chessRef.current.loadPgn(pgn);
+    if (!mainlines || mainlines.length === 0) return;
+    chessRef.current.loadPgn(mainlines[0]);
     movesRef.current = chessRef.current.history();
     chessRef.current.reset();
     setCurrFen(chessRef.current.fen());
-  }, [pgn]);
+  }, [mainlines]);
 
   const handleKeyDown = useCallback((event) => {
     if (event.key === 'ArrowRight' && currentIndexRef.current < movesRef.current.length - 1) {
@@ -83,7 +84,7 @@ const Board = ({ pgn }) => {
 };
 
 Board.propTypes = {
-  pgn: PropTypes.string.isRequired,
+  mainlines: PropTypes.array.isRequired,
 };
 
 export default Board;
