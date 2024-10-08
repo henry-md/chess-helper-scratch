@@ -12,17 +12,21 @@ const Board = ({ mainlines, isWhite }) => {
   const lineIdxRef = useRef(0);
   const [currFen, setCurrFen] = useState('');
 
-  // Load game history, set key tracking
   const loadNextGame = useCallback(() => {
+    // if there isn't really anything to load, load empty board
     if (!mainlines || mainlines.length === 0) {
       chessRef.current.reset();
       setCurrFen(chessRef.current.fen());
       return;
     };
+
+    // load the next game
     chessRef.current.loadPgn(mainlines[lineIdxRef.current]);
     movesRef.current = chessRef.current.history();
     chessRef.current.reset();
     setCurrFen(chessRef.current.fen());
+    currMoveIdxRef.current = -1;
+    maxMoveIdxRef.current = movesRef.current.length - 1;
   }, [mainlines, lineIdxRef]);
 
   const handleKeyDown = useCallback((event) => {
@@ -36,6 +40,13 @@ const Board = ({ mainlines, isWhite }) => {
       setCurrFen(chessRef.current.fen());
     }
   }, []);
+
+  const playComputerMove = () => {
+    if (currMoveIdxRef.current == movesRef.current.length - 1) return;
+    currMoveIdxRef.current++;
+    chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
+    setCurrFen(chessRef.current.fen());
+  }
 
   const onDrop = (sourceSquare, targetSquare) => {
     const chess = chessRef.current;
@@ -54,6 +65,14 @@ const Board = ({ mainlines, isWhite }) => {
         currMoveIdxRef.current++;
         maxMoveIdxRef.current = Math.max(maxMoveIdxRef.current, currMoveIdxRef.current);
         setCurrFen(chess.fen());
+
+        // check if we need to go to the next game
+        if (currMoveIdxRef.current === movesRef.current.length - 1) {
+          lineIdxRef.current++;
+          loadNextGame();
+        } else {
+          playComputerMove();
+        }
         return true;
       } else {
         // Move is incorrect: reset the position
