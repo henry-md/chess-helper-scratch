@@ -1,13 +1,17 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Board from "./components/Board";
 import { Chess } from "chess.js";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 
 function App() {
   const [textareaContent, setTextareaContent] = useState('');
   const [mainlines, setMainlines] = useState([]);
   const [isPlayingWhite, setIsPlayingWhite] = useState(true);
+  const [isSkipping, setIsSkipping] = useState(false);
+  const [numMovesToFirstBranch, setNumMovesToFirstBranch] = useState(0);
+  
   const [currFen, setCurrFen] = useState('');
-
   const chessRef = useRef(new Chess());
   const movesRef = useRef([]);
   const currMoveIdxRef = useRef(-1);
@@ -15,11 +19,25 @@ function App() {
   const lineIdxRef = useRef(0);
 
   const handleTextareaChange = (event) => {
-    if (event.target.value === '') return
     console.log('content', event.target.value);
     setTextareaContent(event.target.value);
+    if (event.target.value === '') return
     setMainlines(pgnToMainlines(event.target.value));
-    console.log('mainlines', mainlines);
+    setNumMovesToFirstBranch(findNumMovesToFirstBranch(event.target.value));
+    console.log('mainlines', pgnToMainlines(event.target.value));
+  };
+
+  const findNumMovesToFirstBranch = (pgn) => {
+    let numMoves = 0;
+    const moves = pgn.split(/\s+/).filter(token => token.trim() !== '');
+    console.log('moves', moves);
+    for (const move of moves) {
+      // if the first character is a number, continue
+      if (/[0-9]/.test(move[0])) continue;
+      if (move.includes('(')) break;
+      numMoves++;
+    }
+    return numMoves - 1;
   };
 
   // turns a nested pgn into a set of mainline pgns.
@@ -55,23 +73,29 @@ function App() {
     };
   
     backtrack(0, []);
+    // mainlinesToTree(mainlines);
     return mainlines.reverse();
   };
 
-  const loadNextGame = useCallback(() => {
-    if (!mainlines || mainlines.length === 0) {
-      chessRef.current.reset();
-      setCurrFen(chessRef.current.fen());
-      return;
-    };
-
-    chessRef.current.loadPgn(mainlines[lineIdxRef.current]);
-    movesRef.current = chessRef.current.history();
-    chessRef.current.reset();
-    setCurrFen(chessRef.current.fen());
-    currMoveIdxRef.current = -1;
-    maxMoveIdxRef.current = movesRef.current.length - 1;
-  }, [mainlines]);
+  // const mainlinesToTree = (mainlines) => {
+  //   console.log('mainlines', mainlines);
+  //   const tree = {};
+  //   for (const line of mainlines) {
+  //     // check that move does not have any numerical character in it, and is not empty
+  //     const moves = line.split(' ').filter(move => !/[0-9]/.test(move) && move !== '');
+  //     console.log('line', line);
+  //     console.log('moves', moves);
+  //     break;
+  //     let currNode = tree;
+  //     for (const move of moves) {
+  //       if (!currNode[move]) {
+  //         currNode[move] = {};
+  //       }
+  //       currNode = currNode[move];
+  //     }
+  //   }
+  //   return tree;
+  // };
 
   const handleKeyDown = useCallback((event) => {
     if (event.key === 'ArrowRight' && currMoveIdxRef.current < maxMoveIdxRef.current) {
@@ -85,20 +109,8 @@ function App() {
     }
   }, []);
 
-  const playComputerMove = () => {
-    setTimeout(() => {
-      if (currMoveIdxRef.current === movesRef.current.length - 1) return;
-      currMoveIdxRef.current++;
-      chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
-      setCurrFen(chessRef.current.fen());
-    }, 200);
-  };
-
   const getHint = () => {
-    console.log('getHint');
-    console.log(currMoveIdxRef.current, movesRef.current.length - 1);
     if (currMoveIdxRef.current === movesRef.current.length - 1) return;
-    console.log('getting here');
     currMoveIdxRef.current++;
     chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
     setCurrFen(chessRef.current.fen());
@@ -108,6 +120,58 @@ function App() {
       setCurrFen(chessRef.current.fen());
     }, 500);
   };
+
+  const playComputerMove = useCallback(() => {
+    if (currMoveIdxRef.current === movesRef.current.length - 1) return;
+    setTimeout(() => {
+      currMoveIdxRef.current++;
+      maxMoveIdxRef.current = Math.max(maxMoveIdxRef.current, currMoveIdxRef.current);
+      chessRef.current.move(movesRef.current[currMoveIdxRef.current]);
+      setCurrFen(chessRef.current.fen());
+      console.log('currMoveIdxRef.current', currMoveIdxRef.current, 'of', movesRef.current.length - 1);
+    }, 200);
+  }, []);
+
+  const loadNextGame = useCallback(() => {
+    if (!mainlines || mainlines.length === 0) {
+      console.log('trivial load');
+      chessRef.current.reset();
+      setCurrFen(chessRef.current.fen());
+      return;
+    };
+
+    chessRef.current.loadPgn(mainlines[lineIdxRef.current]);
+    movesRef.current = chessRef.current.history();
+    chessRef.current.reset();
+    setCurrFen(chessRef.current.fen());
+    currMoveIdxRef.current = -1;
+    maxMoveIdxRef.current = -1;
+
+    // play moves until next branching variation
+    if (isSkipping) {
+      for (let i = 0; i < numMovesToFirstBranch; i++) {
+        setTimeout(() => {
+          playComputerMove();
+        }, 300 * (i + 1));
+      }
+    }
+
+    // play next move if after skipping (or not), it is your opponent's move
+    let skippingMovesPlayed = isSkipping ? numMovesToFirstBranch : 0;
+    if (isPlayingWhite && skippingMovesPlayed % 2 === 1) {
+      playComputerMove();
+    } else if (!isPlayingWhite && skippingMovesPlayed % 2 === 0) {
+      playComputerMove();
+    }
+
+  }, [mainlines, isPlayingWhite, isSkipping, numMovesToFirstBranch, playComputerMove]);
+
+  const getNextGameIfEnded = useCallback(() => {
+    if (currMoveIdxRef.current === movesRef.current.length - 1) {
+      lineIdxRef.current++;
+      loadNextGame();
+    }
+  }, [loadNextGame]);
 
   const onDrop = (sourceSquare, targetSquare) => {
     const chess = chessRef.current;
@@ -125,12 +189,10 @@ function App() {
         maxMoveIdxRef.current = Math.max(maxMoveIdxRef.current, currMoveIdxRef.current);
         setCurrFen(chess.fen());
 
-        if (currMoveIdxRef.current === movesRef.current.length - 1) {
-          lineIdxRef.current++;
-          loadNextGame();
-        } else {
+        if (currMoveIdxRef.current != movesRef.current.length - 1) {
           playComputerMove();
         }
+        getNextGameIfEnded();
         return true;
       } else {
         setCurrFen(chess.fen());
@@ -145,13 +207,20 @@ function App() {
     return false;
   };
 
+  // when the user changes the isPlayingWhite state, return currMoveIdxRef and maxMoveIdxRef to -1, and change lineIdxRef to 0
   useEffect(() => {
+    currMoveIdxRef.current = -1;
+    maxMoveIdxRef.current = -1;
+    lineIdxRef.current = 0;
     loadNextGame();
+  }, [isPlayingWhite, loadNextGame]);
+
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [loadNextGame, handleKeyDown]);
+  }, [handleKeyDown]);
 
   return (
     <>
@@ -184,8 +253,20 @@ function App() {
             ></button>
             <button 
               className={`w-[25px] h-[25px] bg-[#b58863] rounded-md ${!isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
-              onClick={() => setIsPlayingWhite(false)}
+              onClick={() => {setIsPlayingWhite(false)}}
             ></button>
+          </div>
+          <div className="flex flex-row justify-center items-center gap-2">
+            Skip to first branch:
+            <button 
+              onClick={() => setIsSkipping(!isSkipping)}
+            >
+              <FontAwesomeIcon 
+                className="text-[#411A06]" // dark: 411A06
+                icon={isSkipping ? faToggleOn : faToggleOff} 
+                size="lg"
+              />
+            </button>
           </div>
         </div>
       </div>
