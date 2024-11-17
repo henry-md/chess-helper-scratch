@@ -1,0 +1,2 @@
+After cloning, change .env file:
+MONGO_URL=mongodb+srv://henry:cCnY0BtVwICpMDxH@cluster0.qruvcuc.mongodb.net/<YOUR APP NAME HERE>?retryWrites=true&w=majority&appName=Cluster0

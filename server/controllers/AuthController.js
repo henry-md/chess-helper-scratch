@@ -52,7 +52,18 @@ const Login = async (req, res, next) => {
   }
 };
 
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({ users, success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching users", success: false });
+  }
+};
+
 module.exports = {
   Signup,
   Login,
+  getAllUsers,
 };
