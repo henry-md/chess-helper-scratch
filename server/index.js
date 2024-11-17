@@ -30,4 +30,10 @@ app.use(cookieParser());
 
 app.use(express.json());
 
+// Add a general request logger
+// app.use((req, res, next) => {
+//   console.log(`log: ${req.method} ${req.path}`);
+//   next();
+// });
+
 app.use("/", authRoute);

@@ -1,4 +1,4 @@
-const User = require("../models/UserModel");
+const User = require("../models/User");
 const { createSecretToken } = require("../util/SecretToken");
 const bcrypt = require("bcryptjs");
 
@@ -32,11 +32,11 @@ const Login = async (req, res, next) => {
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return res.json({message:'Incorrect password or email' }) 
+      return res.json({ message: "Incorrect password or email" });
     }
-    const auth = await bcrypt.compare(password,user.password)
+    const auth = await bcrypt.compare(password, user.password);
     if (!auth) {
-      return res.json({message:'Incorrect password or email' }) 
+      return res.json({ message: "Incorrect password or email" });
     }
     const token = createSecretToken(user._id);
     res.cookie("token", token, {

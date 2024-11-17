@@ -6,12 +6,15 @@ import { ToastContainer, toast } from "react-toastify";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [cookies, removeCookie] = useCookies([]);
+  const [cookies, removeCookie] = useCookies([]); // watch all cookies
   const [username, setUsername] = useState("");
   useEffect(() => {
     const verifyCookie = async () => {
+      await new Promise(resolve => setTimeout(resolve, 200));
       if (!cookies.token) {
+        console.log('No token found, navigating to login');
         navigate("/login");
+        return;
       }
       const { data } = await axios.post(
         "http://localhost:4000",

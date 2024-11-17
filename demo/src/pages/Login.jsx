@@ -30,18 +30,17 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post(
+      const res = await axios.post(
         "http://localhost:4000/login",
         {
           ...inputValue,
         },
         { withCredentials: true }
       );
-      console.log('data', data);
-      const { success, message } = data;
+      const { success, message } = res.data;
       if (success) {
         handleSuccess(message);
-        setTimeout(() => {
+        setTimeout(() => {      
           navigate("/");
         }, 1000);
       } else {
