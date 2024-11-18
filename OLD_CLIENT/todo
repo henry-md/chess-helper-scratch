@@ -1,5 +1,0 @@
-
-Bugs
-- get rid of green plus icon when drag hovering pieces
-- put pgn generation in separate component
-- make sure game can reset after a computer move
