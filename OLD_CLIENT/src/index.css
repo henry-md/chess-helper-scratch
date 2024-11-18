@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide the default drag image */
+.chessboard-piece::before {
+  display: none !important;
+}
