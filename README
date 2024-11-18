@@ -1,2 +1,5 @@
 After cloning, change .env file:
 MONGO_URL=mongodb+srv://henry:cCnY0BtVwICpMDxH@cluster0.qruvcuc.mongodb.net/<YOUR APP NAME HERE>?retryWrites=true&w=majority&appName=Cluster0
+
+Based on the following tutorial:
+https://www.freecodecamp.org/news/how-to-secure-your-mern-stack-application/#heading-how-to-set-up-mongodb
