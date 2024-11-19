@@ -42,7 +42,7 @@ const Dashboard = () => {
       <div className="p-[4rem] pt-24 px-32">
         <div className="grid grid-cols-1 gap-8 mx-auto sm:grid-cols-2 lg:grid-cols-4">
           {
-            Array.from({ length: 10 }).map((_, index) => (
+            Array.from({ length: 6 }).map((_, index) => (
               <BoardPreview key={index} gameTitle={`Game Title ${index + 1}`} isWhite={index % 2 === 0} />
             ))
           }

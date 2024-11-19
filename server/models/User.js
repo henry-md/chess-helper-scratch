@@ -5,17 +5,18 @@ const bcrypt = require("bcryptjs");
 const pgnSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
+    unique: true,
   },
   pgn: {
     type: String,
     required: true
   },
+  notes: String,
   createdAt: {
     type: Date,
     default: Date.now
   },
-  notes: String,
 });
 
 const userSchema = new mongoose.Schema({
