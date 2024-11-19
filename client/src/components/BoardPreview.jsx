@@ -5,7 +5,7 @@ const BoardPreview = ({ gameTitle, isWhite }) => {
   return (
     <div className="cursor-pointer">
       <p className="pb-2 text-center">{gameTitle}</p>
-      <div className="w-[250px] h-[250px] group rounded-md relative">
+      <div className="relative rounded-md group">
         <div className="absolute inset-0 z-50 transition-opacity bg-black rounded-md opacity-0 group-hover:opacity-10"></div>
         <Chessboard
           id="BasicBoard"
