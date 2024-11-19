@@ -46,7 +46,7 @@ const Login = () => {
       const { success, message } = res.data;
       if (success) {
         handleSuccess(message);
-        navigate("/");
+        navigate("/dashboard");
       } else {
         handleError(message);
       }

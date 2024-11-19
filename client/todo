@@ -1,0 +1,8 @@
+
+Bugs (frontend)
+- get rid of green plus icon when drag hovering pieces
+- put pgn generation in separate component
+- make sure game can reset after a computer move
+
+Bugs (backend related)
+- Navbar is not updating on Home page even though there should be a cookie

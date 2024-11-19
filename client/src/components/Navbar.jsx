@@ -13,14 +13,14 @@ const Navbar = () => {
   };
 
   return (
-    <ul className="flex justify-end items-center gap-2 mx-16">
-      <li><a className="cursor-pointer px-4 py-4 flex items-center hover:text-yellow-600" onClick={() => navigate("/")}>Home</a></li>
+    <ul className="flex items-center justify-end gap-2 mx-16">
+      <li><a className="flex items-center px-4 py-4 cursor-pointer hover:text-yellow-600" onClick={() => navigate("/")}>Home</a></li>
       {isAuthenticated && !isHome ? (
-        <li><a className="cursor-pointer px-4 py-4 flex items-center hover:text-yellow-600" onClick={handleLogout}>Logout</a></li>
+        <li><a className="flex items-center px-4 py-4 cursor-pointer hover:text-yellow-600" onClick={handleLogout}>Logout</a></li>
       ) : (
         <>
-          <li><a className="cursor-pointer px-4 py-4 flex items-center hover:text-yellow-600" onClick={() => navigate("/login")}>Login</a></li>
-          <li><a className="cursor-pointer px-4 py-4 flex items-center hover:text-yellow-600" onClick={() => navigate("/signup")}>Signup</a></li>
+          <li><a className="flex items-center px-4 py-4 cursor-pointer hover:text-yellow-600" onClick={() => navigate("/login")}>Login</a></li>
+          <li><a className="flex items-center px-4 py-4 cursor-pointer hover:text-yellow-600" onClick={() => navigate("/signup")}>Signup</a></li>
         </>
       )}
     </ul>
