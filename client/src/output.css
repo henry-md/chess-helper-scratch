@@ -579,16 +579,16 @@ video {
   height: 400px;
 }
 
-.w-full {
-  width: 100%;
-}
-
 .w-\[25px\] {
   width: 25px;
 }
 
 .w-\[600px\] {
   width: 600px;
+}
+
+.w-full {
+  width: 100%;
 }
 
 .cursor-pointer {
@@ -659,6 +659,11 @@ video {
   padding: 0.5rem;
 }
 
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
@@ -667,11 +672,6 @@ video {
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
-}
-
-.px-3 {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
 }
 
 .text-\[\#411A06\] {

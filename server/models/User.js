@@ -1,6 +1,23 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
+// Put pgnSchema inside userSchema to avoid an O(n) lookup
+const pgnSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  pgn: {
+    type: String,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  notes: String,
+});
+
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -15,6 +32,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Your password is required"],
   },
+  pgns: [pgnSchema],
   createdAt: {
     type: Date,
     default: new Date(),
