@@ -13,7 +13,7 @@ const Navbar = () => {
   };
 
   return (
-    <ul className="flex items-center justify-end gap-2 mx-16">
+    <ul className="absolute top-0 right-0 flex items-center justify-end gap-2 mx-16">
       <li><a className="flex items-center px-4 py-4 cursor-pointer hover:text-yellow-600" onClick={() => navigate("/")}>Home</a></li>
       {isAuthenticated && !isHome ? (
         <li><a className="flex items-center px-4 py-4 cursor-pointer hover:text-yellow-600" onClick={handleLogout}>Logout</a></li>
