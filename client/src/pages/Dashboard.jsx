@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [cookies, removeCookie] = useCookies([]); // watch all cookies
   // eslint-disable-next-line no-unused-vars
   const [username, setUsername] = useState("");
+  const [pgns, setPgn] = useState([]);
   
   // Verify token, and kick user out if it's not valid
   useEffect(() => {
@@ -37,15 +38,28 @@ const Dashboard = () => {
     verifyCookie();
   }, [cookies, navigate, removeCookie]);
 
+  useEffect(() => {
+    const fetchPgn = async () => {
+      const { data } = await axios.get("http://localhost:4000/get-all-pgns", { withCredentials: true });
+      console.log('data', data, 'pgns', data.pgns);
+      setPgn(data.pgns);
+    };
+    fetchPgn();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <Navbar />
       <div className="p-[4rem] pt-24 px-32">
         <div className="grid grid-cols-1 gap-8 mx-auto sm:grid-cols-2 lg:grid-cols-4">
           {
-            Array.from({ length: 6 }).map((_, index) => (
-              <BoardPreview key={index} gameTitle={`Game Title ${index + 1}`} isWhite={index % 2 === 0} />
+            pgns.map((pgn, index) => (
+              <BoardPreview key={index} gameTitle={pgn.title} isWhite={index % 2 === 0} />
             ))
+            // Array.from({ length: 6 }).map((_, index) => (
+            //   <BoardPreview key={index} gameTitle={`Game Title ${index + 1}`} isWhite={index % 2 === 0} />
+            // ))
           }
           <div onClick={() => navigate("/")} className="cursor-pointer">
             <p className="pb-2 text-center">New Study</p>

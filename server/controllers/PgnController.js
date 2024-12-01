@@ -1,14 +1,24 @@
 const User = require("../models/User");
 
+const getAllPgn = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    res.status(200).json({ pgns: user.pgns, success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching PGNs", success: false });
+  }
+}
+
 const createPgn = async (req, res) => {
   try {
-    // Try to get user
+    // Get user
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found", success: false });
     }
 
-    // Update user PGN
+    // Update user PGN if no dup titles exist
     const { title, pgn, notes } = req.body;
     if (user.pgns.some(pgn => pgn.title === title)) {
       return res.status(400).json({ message: "Title already exists", success: false });
@@ -50,10 +60,11 @@ const deletePgn = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-i  }
+  }
 };
 
 module.exports = {
+  getAllPgn,
   createPgn,
   deletePgn
 };
