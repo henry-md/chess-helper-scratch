@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const { createSecretToken } = require("../util/SecretToken");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const Signup = async (req, res) => {
   try {
@@ -31,11 +33,11 @@ const Login = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return res.json({ message: "Incorrect password or email" });
+      return res.json({ message: "Incorrect password or email [psst... user not found]" });
     }
     const auth = await bcrypt.compare(password, user.password);
     if (!auth) {
-      return res.json({ message: "Incorrect password or email" });
+      return res.json({ message: "Incorrect password or email [psst... incorrect password]" });
     }
     const token = createSecretToken(user._id);
     res.cookie("token", token, {
@@ -50,6 +52,29 @@ const Login = async (req, res) => {
   }
 };
 
+const verifyToken = (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.json({ status: false });
+  }
+  jwt.verify(token, process.env.TOKEN_KEY, async (err, data) => {
+    if (err) {
+      return res.json({ status: false });
+    } else {
+      const user = await User.findById(data.id);
+      if (user) {
+        return res.json({
+          status: true,
+          username: user.username,
+          userId: user._id,
+        });
+      } else {
+        return res.json({ status: false });
+      }
+    }
+  });
+};
+
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
@@ -60,8 +85,22 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
+    res.status(200).json({ message: "User deleted successfully", user, success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting user", success: false });
+  }
+}
+
 module.exports = {
   Signup,
   Login,
+  verifyToken,
   getAllUsers,
+  deleteUser,
+
 };

@@ -26,10 +26,10 @@ const Dashboard = () => {
         {},
         { withCredentials: true }
       );
-      const { status, user } = data;
-      setUsername(user);
+      const { status, username } = data;
+      setUsername(username);
       return status
-        ? toast(`Hello ${user}`, {
+        ? toast(`Hello ${username}`, {
             position: "bottom-right",
           })
         : (removeCookie("token"), navigate("/login"));
