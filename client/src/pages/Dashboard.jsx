@@ -12,16 +12,17 @@ const Dashboard = () => {
   const [cookies, removeCookie] = useCookies([]); // watch all cookies
   // eslint-disable-next-line no-unused-vars
   const [username, setUsername] = useState("");
+  
+  // Verify token, and kick user out if it's not valid
   useEffect(() => {
     const verifyCookie = async () => {
-      await new Promise(resolve => setTimeout(resolve, 2000));
       if (!cookies.token) {
         console.log('No token found, navigating to login');
         navigate("/login");
         return;
       }
       const { data } = await axios.post(
-        "http://localhost:4000",
+        "http://localhost:4000/verify-token",
         {},
         { withCredentials: true }
       );

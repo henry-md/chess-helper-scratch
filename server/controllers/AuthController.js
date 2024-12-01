@@ -2,7 +2,7 @@ const User = require("../models/User");
 const { createSecretToken } = require("../util/SecretToken");
 const bcrypt = require("bcryptjs");
 
-const Signup = async (req, res, next) => {
+const Signup = async (req, res) => {
   try {
     const { email, password, username, createdAt } = req.body;
     const existingUser = await User.findOne({ email });
@@ -18,13 +18,12 @@ const Signup = async (req, res, next) => {
     res
       .status(201)
       .json({ message: "User signed in successfully", success: true, user });
-    next();
   } catch (error) {
     console.error(error);
   }
 };
 
-const Login = async (req, res, next) => {
+const Login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -46,13 +45,12 @@ const Login = async (req, res, next) => {
     res
       .status(201)
       .json({ message: "User logged in successfully", success: true });
-    next();
   } catch (error) {
     console.error(error);
   }
 };
 
-const getAllUsers = async (req, res, next) => {
+const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
     res.status(200).json({ users, success: true });

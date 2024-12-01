@@ -1,6 +1,6 @@
 const User = require("../models/User");
 
-const addPgn = async (req, res) => {
+const createPgn = async (req, res) => {
   try {
     // Try to get user
     const user = await User.findById(req.userId);
@@ -54,6 +54,6 @@ i  }
 };
 
 module.exports = {
-  addPgn,
+  createPgn,
   deletePgn
 };
