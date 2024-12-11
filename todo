@@ -1,0 +1,12 @@
+bugs
+- Lucia: cookies is not being set properly in navbar after sign in, so you're signed in but it still gives "login" and "signup" options.
+
+not to forget later
+- Add authGuard back later to routes after I can get Lucia to work
+
+
+things I did since last meeting
+- migrated file from js -> ts
+- migrated from bad practice token/session mixed auth to session based auth with Lucia
+- added seed script
+- Added proper Pgn routes & model rather than pgn list on user object
