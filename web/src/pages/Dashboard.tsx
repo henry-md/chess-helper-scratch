@@ -9,10 +9,13 @@ import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const user = useStore($user);
-  const { pgns } = useMutationPgns();
+  const { pgns, getPgns } = useMutationPgns();
   const navigate = useNavigate();
 
-  console.log('dashboard: pgns', pgns);
+  // Load PGNs when component mounts
+  useEffect(() => {
+    getPgns();
+  }, []);
 
   useEffect(() => {
     toast(`Welcome ${user.username}!`, {
@@ -30,6 +33,7 @@ const Dashboard = () => {
     <>
       <Navbar />
       <div className="p-[4rem] pt-24 px-32">
+        <h1 className="mx-auto mb-8 text-2xl font-bold text-center">My Studies</h1>
         <div className="grid grid-cols-1 gap-8 mx-auto sm:grid-cols-2 lg:grid-cols-4">
           {
             Array.isArray(pgns) && pgns.map((pgn, index) => (

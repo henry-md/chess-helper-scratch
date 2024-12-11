@@ -18,7 +18,7 @@ function ChessApp() {
   const maxMoveIdxRef = useRef(-1);
   const lineIdxRef = useRef(0);
 
-  const handleTextareaChange = (event) => {
+  const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     console.log('content', event.target.value);
     setTextareaContent(event.target.value);
     if (event.target.value === '') return
@@ -134,7 +134,6 @@ function ChessApp() {
 
   const loadNextGame = useCallback(() => {
     if (!mainlines || mainlines.length === 0) {
-      console.log('trivial load');
       chessRef.current.reset();
       setCurrFen(chessRef.current.fen());
       return;
