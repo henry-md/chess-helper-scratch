@@ -22,7 +22,6 @@ function useMutationPgns() {
 
   const updatePgnContent = async (pgnId: string, title: string, pgn: string, notes: string) => {
     try {
-      console.log('endpoint', `${API_URL}/pgn/${pgnId}`);
       const response = await fetch(`${API_URL}/pgn/${pgnId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -44,7 +43,7 @@ function useMutationPgns() {
         method: "DELETE", 
         credentials: "include" 
       });
-      deletePgn(pgnId);
+      // deletePgn(pgnId);
       triggerPgnsRefresh();
     } catch (error) {
       console.error(error);

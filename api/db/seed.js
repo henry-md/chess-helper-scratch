@@ -10,7 +10,6 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Load .env from the root directory
 dotenv.config({ path: join(__dirname, "../.env") });
-console.log(join(__dirname, "../.env"));
 
 const { MONGO_URL } = process.env;
 

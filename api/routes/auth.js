@@ -16,7 +16,6 @@ const hashOptions = {
 const lucia = await initializeLucia();
 
 authRouter.get("/test-auth", authGuard, async (req, res) => {
-  console.log('test: req.user', req.user);
   res.json({ message: 'test' });
 });
 
@@ -79,7 +78,6 @@ authRouter.post("/sign-in", async (req, res) => {
     const session = await lucia.createSession(user.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
     const serializedSessionCookie = sessionCookie.serialize();
-    console.log('routes/auth: serializedSessionCookie', serializedSessionCookie);
     res.setHeader("Set-Cookie", serializedSessionCookie, {
       append: true,
     });
@@ -89,15 +87,13 @@ authRouter.post("/sign-in", async (req, res) => {
     // But i'm not even reading the updated cookie here, and either way lucia won't validate anything.
     try {
       // read it directly after
-      console.log('routes/auth: trying to read session directly after')
       const cookie = req.header("Cookie") ?? "";
-      console.log('routes/auth: cookie', cookie);
       const sessionId = lucia.readSessionCookie(cookie);
       const res = await lucia.validateSession(sessionId);
       const resSession = res.session;
       const resUser = res.user;
-      console.log('resSession', resSession);
-      console.log('resUser', resUser);
+      console.log('sign in route: resSession', resSession);
+      console.log('sign in route: resUser', resUser);
     } catch (error) {
       console.error(error);
     }

@@ -3,7 +3,6 @@ import { initializeLucia } from "../db/auth.js";
 const lucia = await initializeLucia();
 
 export const auth = async (req, res, next) => {
-  console.log('in auth');
   const cookie = req.header("Cookie") ?? "";
   const sessionId = lucia.readSessionCookie(cookie);
 
@@ -34,12 +33,10 @@ export const auth = async (req, res, next) => {
     });
   }
 
-  console.log('setting here');
   req.session = session;
   req.user = user;
-  console.log('req.user', req.user);
   
   // pretend auth middleware and lucia are actually doing their job
-  req.userId = '675a2419bc4653e773538634';
+  req.userId = '675b35ae2ba5569947c3b006';
   return next();
 };

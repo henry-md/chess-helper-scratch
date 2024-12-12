@@ -28,7 +28,7 @@ const DeletePgnDialog = ({
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     await deletePgn(pgn._id);
-    triggerPgnsRefresh();
+    // triggerPgnsRefresh();
     setDeleteDialogOpen(false);
   };
 
