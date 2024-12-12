@@ -40,6 +40,6 @@ export const auth = async (req, res, next) => {
   console.log('req.user', req.user);
   
   // pretend auth middleware and lucia are actually doing their job
-  req.userId = '6759cd9ef7a87ee3ba2f8ebf';
+  req.userId = '675a2419bc4653e773538634';
   return next();
 };

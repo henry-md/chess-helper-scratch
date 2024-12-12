@@ -1,5 +1,6 @@
 import { persistentMap } from "@nanostores/persistent";
 import { UserType, PgnType } from "@/lib/types";
+import { atom } from "nanostores";
 
 // Default objects for deletion
 const defaultUser = {
@@ -43,4 +44,20 @@ export const updatePgn = (pgnId: string, title: string, pgn: string, notes: stri
 };
 export const clearPgns = () => {
   $pgns.set(defaultPgns);
+};
+
+// Dialogs
+export const $showEditPgn = atom(false);
+export const $showDeletePgn = atom(false);
+export const toggleEditPgnDialog = () => {
+  $showEditPgn.set(!$showEditPgn.get());
+};
+export const toggleDeletePgnDialog = () => {
+  $showDeletePgn.set(!$showDeletePgn.get());
+};
+
+// Refresh
+export const $refreshPgnsTrigger = atom(0);
+export const triggerPgnsRefresh = () => {
+  $refreshPgnsTrigger.set($refreshPgnsTrigger.get() + 1);
 };

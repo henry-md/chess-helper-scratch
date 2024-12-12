@@ -1,7 +1,7 @@
 import Navbar from "../components/navbar";
 import ChessApp from "../components/chess-app";
 
-const Home = () => {
+const Game = () => {
   return (
     <>
       <Navbar />
@@ -10,4 +10,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Game;

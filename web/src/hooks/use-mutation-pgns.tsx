@@ -1,26 +1,8 @@
 import { API_URL } from "@/env";
 import { toast } from "react-toastify";
-import { $pgns, setPgns, addPgn, updatePgn } from "@/lib/store";
-import { useStore } from "@nanostores/react";
+import { addPgn, updatePgn, triggerPgnsRefresh } from "@/lib/store";
 
 function useMutationPgns() {
-  const pgns = useStore($pgns);
-
-  const getPgns = async () => {
-    try {
-      const response = await fetch(`${API_URL}/pgns`, {
-        method: "GET",
-        credentials: "include",
-      });
-      const { pgns } = await response.json();
-      console.log('use-mutation-pgns hook: getPgns: pgns', pgns);
-      setPgns(pgns);
-    } catch (error) {
-      console.error(error);
-      toast.error("Error fetching PGNs");
-    }
-  }
-
   const createPgn = async (title: string, pgn: string, notes: string) => {
     try {
       const response = await fetch(`${API_URL}/pgns`, {
@@ -31,6 +13,7 @@ function useMutationPgns() {
       });
       const { newPgn } = await response.json();
       addPgn(newPgn);
+      triggerPgnsRefresh();
     } catch (error) {
       console.error(error);
       toast.error("Error adding PGN");
@@ -39,14 +22,16 @@ function useMutationPgns() {
 
   const updatePgnContent = async (pgnId: string, title: string, pgn: string, notes: string) => {
     try {
-      const response = await fetch(`${API_URL}/pgns/${pgnId}`, {
-        method: "PUT",
+      console.log('endpoint', `${API_URL}/pgn/${pgnId}`);
+      const response = await fetch(`${API_URL}/pgn/${pgnId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ title, pgn, notes }),
       });
-      const { updatedPgn } = await response.json();
+      const { pgn: updatedPgn } = await response.json();
       updatePgn(pgnId, updatedPgn.title, updatedPgn.pgn, updatedPgn.notes);
+      triggerPgnsRefresh();
     } catch (error) {
       console.error(error);
       toast.error("Error updating PGN");
@@ -60,13 +45,14 @@ function useMutationPgns() {
         credentials: "include" 
       });
       deletePgn(pgnId);
+      triggerPgnsRefresh();
     } catch (error) {
       console.error(error);
       toast.error("Error deleting PGN");
     }
   }
 
-  return { pgns, getPgns, createPgn, updatePgnContent, deletePgn };
+  return { createPgn, updatePgnContent, deletePgn };
 }
 
 export default useMutationPgns;

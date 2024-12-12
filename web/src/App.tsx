@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import useAuth from "@/hooks/use-auth.tsx";
 
 // Pages
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Home from "./pages/home";
+import Dashboard from "./pages/dashboard";
+import Login from "./pages/login";
+import Register from "./pages/register";
 
 function App() {
   const { validate } = useAuth();
