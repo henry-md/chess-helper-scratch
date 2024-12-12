@@ -13,14 +13,15 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { PgnType } from "@/lib/types";
 import useMutationPgns from "@/hooks/use-mutation-pgns";
-import { toggleEditPgnDialog, triggerPgnsRefresh } from "@/lib/store";
+import { triggerPgnsRefresh } from "@/lib/store";
 
 type EditPgnDialogProps = {
   pgn: PgnType;
   open: boolean;
+  setEditDialogOpen: (open: boolean) => void;
 };
 
-const EditPgnDialog = ({ pgn, open }: EditPgnDialogProps) => {
+const EditPgnDialog = ({ pgn, open, setEditDialogOpen }: EditPgnDialogProps) => {
   const [title, setTitle] = useState(pgn.title);
   const [pgnString, setPgnString] = useState(pgn.pgn);
   const [notes, setNotes] = useState(pgn.notes);
@@ -33,7 +34,7 @@ const EditPgnDialog = ({ pgn, open }: EditPgnDialogProps) => {
     } else {
       await updatePgnContent(pgn._id, title, pgnString, notes);
       triggerPgnsRefresh();
-      toggleEditPgnDialog();
+      setEditDialogOpen(false);
     }
   };
 
@@ -41,7 +42,7 @@ const EditPgnDialog = ({ pgn, open }: EditPgnDialogProps) => {
     <Dialog open={open}>
       <DialogContent>
         <form className="grid w-full gap-1.5 p-1 pr-3">
-          <DialogTitle>Edit PGN {pgn._id}</DialogTitle>
+          <DialogTitle>Edit PGN</DialogTitle>
           <DialogDescription>
             Edit the title, PGN, and notes of your study here.
           </DialogDescription>
@@ -55,8 +56,8 @@ const EditPgnDialog = ({ pgn, open }: EditPgnDialogProps) => {
               className="col-span-3"
               onChange={(e) => setTitle(e.target.value)}
             />
-            <Label htmlFor="back" className="text-sm text-right">
-              Back
+            <Label htmlFor="pgn" className="text-sm text-right">
+              PGN
             </Label>
             <Input
               id="pgn"
@@ -77,7 +78,7 @@ const EditPgnDialog = ({ pgn, open }: EditPgnDialogProps) => {
           <div className="flex justify-end gap-3">
             <DialogClose asChild>
               <Button
-                onClick={() => toggleEditPgnDialog()}
+                onClick={() => setEditDialogOpen(false)}
                 type="button"
                 variant={"secondary"}
               >

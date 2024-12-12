@@ -4,9 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Chessboard } from "react-chessboard";
 import EditPgnDialog from './board-edit-dialog';
 import DeletePgnDialog from './board-delete-dialog';
+import { useState } from 'react';
 import { PgnType } from '@/lib/types';
-import { $showDeletePgn, $showEditPgn, toggleDeletePgnDialog, toggleEditPgnDialog } from '@/lib/store';
-import { useStore } from '@nanostores/react';
 
 interface BoardPreviewProps {
   pgn: PgnType;
@@ -15,10 +14,9 @@ interface BoardPreviewProps {
 }
 
 const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
-  // const [editDialogOpen, setEditDialogOpen] = useState(false);
-  // const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const showEditPgnDialog = useStore($showEditPgn);
-  const showDeletePgnDialog = useStore($showDeletePgn);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
   return (
     <div className="cursor-pointer">
       <p className="pb-2 text-center">{gameTitle}</p>
@@ -26,12 +24,12 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
         {/* Edit and Delete buttons */}
         <div className="absolute top-[5px] right-[-20px] z-50 flex flex-col gap-2">
           <button 
-            onClick={() => toggleEditPgnDialog()}
+            onClick={() => setEditDialogOpen(true)}
             className="text-white bg-gray-900 rounded-[100%] w-[22px] h-[22px] flex items-center justify-center">
               <FontAwesomeIcon className="w-[12px] h-[12px]" icon={faPenToSquare} />
           </button>
           <button 
-            onClick={() => toggleDeletePgnDialog()}
+            onClick={() => setDeleteDialogOpen(true)}
             className="text-white bg-gray-900 rounded-[100%] w-[22px] h-[22px] flex items-center justify-center">
               <FontAwesomeIcon className="w-[12px] h-[12px]" icon={faTrash} />
           </button>
@@ -54,8 +52,8 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
           />
         </div>
       </div>
-      <EditPgnDialog pgn={pgn} open={showEditPgnDialog} />
-      <DeletePgnDialog pgn={pgn} open={showDeletePgnDialog} />
+      <EditPgnDialog pgn={pgn} open={editDialogOpen} setEditDialogOpen={setEditDialogOpen} />
+      <DeletePgnDialog pgn={pgn} open={deleteDialogOpen} setDeleteDialogOpen={setDeleteDialogOpen} />
     </div>
   )
 };

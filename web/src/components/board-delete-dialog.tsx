@@ -10,16 +10,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PgnType } from "@/lib/types";
 import useMutationPgns from "@/hooks/use-mutation-pgns";
-import { toggleDeletePgnDialog, triggerPgnsRefresh } from "@/lib/store";
+import { triggerPgnsRefresh } from "@/lib/store";
 
 type DeletePgnDialogProps = {
   pgn: PgnType;
   open: boolean;
+  setDeleteDialogOpen: (open: boolean) => void;
 };
 
 const DeletePgnDialog = ({
   pgn,
   open,
+  setDeleteDialogOpen,
 }: DeletePgnDialogProps) => {
   const { deletePgn } = useMutationPgns();
 
@@ -27,7 +29,7 @@ const DeletePgnDialog = ({
     e.preventDefault();
     await deletePgn(pgn._id);
     triggerPgnsRefresh();
-    toggleDeletePgnDialog();
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -41,7 +43,7 @@ const DeletePgnDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
