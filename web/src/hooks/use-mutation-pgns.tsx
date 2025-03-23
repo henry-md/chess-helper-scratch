@@ -4,12 +4,12 @@ import { addPgn, updatePgn, triggerPgnsRefresh } from "@/lib/store";
 import { getAuthHeader } from "@/utils/auth";
 
 function useMutationPgns() {
-  const createPgn = async (title: string, pgn: string, notes: string) => {
+  const createPgn = async (title: string, pgn: string, notes: string = "", isPublic: boolean = false) => {
     try {
       const response = await fetch(`${API_URL}/pgns`, {
         method: "POST",
         headers: getAuthHeader(),
-        body: JSON.stringify({ title, pgn, notes }),
+        body: JSON.stringify({ title, pgn, notes, isPublic }),
       });
       const { newPgn } = await response.json();
       addPgn(newPgn);
@@ -20,12 +20,20 @@ function useMutationPgns() {
     }
   }
 
-  const updatePgnContent = async (pgnId: string, title: string, pgn: string, notes: string) => {
+  const updatePgnContent = async (
+    pgnId: string,
+    updates: {
+      title?: string;
+      pgn?: string;
+      notes?: string;
+      isPublic?: boolean;
+    }
+  ) => {
     try {
       const response = await fetch(`${API_URL}/pgn/${pgnId}`, {
         method: "PATCH",
         headers: getAuthHeader(),
-        body: JSON.stringify({ title, pgn, notes }),
+        body: JSON.stringify(updates),
       });
       const { pgn: updatedPgn } = await response.json();
       updatePgn(pgnId, updatedPgn.title, updatedPgn.pgn, updatedPgn.notes);

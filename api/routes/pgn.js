@@ -23,7 +23,7 @@ pgnRouter.get("/pgns", authGuard, async (req, res) => {
 
 pgnRouter.post("/pgn", authGuard, async (req, res) => {
   try {
-    const { title, pgn, notes } = req.body;
+    const { title, pgn, notes, isPublic = false } = req.body;
 
     // check if title already exists
     const existingPgns = await Pgn.find({ userId: req.user.id });
@@ -34,7 +34,13 @@ pgnRouter.post("/pgn", authGuard, async (req, res) => {
     }
 
     // Add PGN to database
-    const newPgn = new Pgn({ title, pgn, notes, userId: req.user.id });
+    const newPgn = new Pgn({
+      userId: req.user.id,
+      title,
+      pgn,
+      notes,
+      isPublic,
+    });
     await newPgn.save();
 
     // Return success message
@@ -51,13 +57,23 @@ pgnRouter.post("/pgn", authGuard, async (req, res) => {
 pgnRouter.patch("/pgn/:id", authGuard, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, pgn, notes } = req.body;
 
-    const updatedPgn = await Pgn.findByIdAndUpdate(
-      id,
-      { title, pgn, notes },
-      { new: true }
-    );
+    // Check if PGN exists & user has access rights
+    const pgn = await Pgn.findById(id);
+    if (!pgn) {
+      return res
+        .status(404)
+        .json({ message: "PGN not found", success: false });
+    } else if (pgn.userId !== String(req.user.id)) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to update this PGN", success: false });
+    }
+
+    // Update PGN
+    const updatedPgn = await Pgn.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     res.status(200).json({
       message: "PGN updated successfully",
       success: true,

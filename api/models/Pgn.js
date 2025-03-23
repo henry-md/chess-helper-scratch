@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 // Put pgnSchema inside userSchema to avoid an O(n) lookup
 const pgnSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+    required: true,
+    index: true
+  },
   title: {
     type: String,
     required: true,
@@ -10,11 +15,14 @@ const pgnSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  notes: String,
-  userId: {
+  notes: {
     type: String,
-    required: true,
-    index: true
+    default: "",
+    required: false,
+  },
+  isPublic: {
+    type: Boolean,
+    default: false,
   },
   createdAt: {
     type: Date,
