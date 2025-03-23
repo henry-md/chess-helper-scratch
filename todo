@@ -6,12 +6,6 @@ not to forget later
 - Add authGuard back later to routes after I can get Lucia to work
 
 
-things I did since last meeting
-- migrated file from js -> ts
-- migrated from bad practice token/session mixed auth to session based auth with Lucia
-- added seed script
-- Added proper Pgn routes & model rather than pgn list on user object
-
 Todo
 - allow crud operations on dashboard pgn's w/ edit and delete buttons
 - Implement gameplay as a tree instead of 2d list

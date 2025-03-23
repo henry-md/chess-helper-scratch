@@ -1,31 +1,44 @@
 import { useStore } from "@nanostores/react";
-import { $user, setUser, clearUser, clearPgns } from "@/lib/store";
+import { $user, clearUser, setUser } from "@/store/auth";
 import { API_URL } from "@/env";
-import { UserType } from "@/lib/types";
-import { toast } from "react-toastify";
+import logger from "@/utils/logger";
+import { setIsAuthenticated } from "@/store/auth";
 
 function useAuth() {
   const user = useStore($user);
+
+  const getAuthHeader = (): Record<string, string> => {
+    const token = localStorage.getItem('token');
+    logger.debug("[Auth Hook] Getting auth header:", token ? "Token present" : "No token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   const register = async (email: string, username: string, password: string) => {
     try {
       if (!email || !username || !password) {
         throw new Error("Email, username, and password are required!");
       }
+      logger.debug("[Auth Hook] Attempting to register user:", { email, username });
+      
       const response = await fetch(`${API_URL}/sign-up`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, username, password }),
-        credentials: "include",
       });
+      
+      logger.debug("[Auth Hook] Register response status:", response.status);
       if (!response.ok) {
         throw new Error(`API request failed! with status: ${response.status}`);
       }
 
-      const { user }: { user: UserType } = await response.json();
+      const { user, token } = await response.json();
+      logger.debug("[Auth Hook] Registration successful, setting token and user");
+      localStorage.setItem('token', token);
       setUser(user);
+      setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
+      logger.error("[Auth Hook] Registration error:", error);
       const errorMessage =
         (error as Error).message ?? "Please try again later!";
       return {
@@ -40,20 +53,29 @@ function useAuth() {
       if (!email || !password) {
         throw new Error("Email and password are required!");
       }
+      logger.debug("[Auth Hook] Attempting to login user:", { email, password });
+      
       const response = await fetch(`${API_URL}/sign-in`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
       });
+      
+      logger.debug("[Auth Hook] Login response status:", response.status);
       if (!response.ok) {
-        throw new Error(`API request failed! with status: ${response.status}`);
+        const errorData = await response.json();
+        logger.error("[Auth Hook] Login failed:", errorData);
+        throw new Error(errorData.message || `API request failed! with status: ${response.status}`);
       }
 
-      const { user }: { user: UserType } = await response.json();
+      const { user, token } = await response.json();
+      logger.debug("[Auth Hook] Login successful, setting token and user");
+      localStorage.setItem('token', token);
       setUser(user);
+      setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
+      logger.error("[Auth Hook] Login error:", error);
       const errorMessage =
         (error as Error).message ?? "Please try again later!";
       return {
@@ -65,27 +87,53 @@ function useAuth() {
 
   const logout = async () => {
     try {
+      logger.debug("[Auth Hook] Attempting to logout");
       await fetch(`${API_URL}/sign-out`, {
         method: "POST",
-        credentials: "include",
+        headers: getAuthHeader(),
       });
+      localStorage.removeItem('token');
       clearUser();
-      clearPgns();
+      setIsAuthenticated(false);
+      logger.debug("[Auth Hook] Logout successful");
     } catch (error) {
-      console.error(error);
-      toast.error("Error logging out");
+      logger.error("[Auth Hook] Logout error:", error);
+      setIsAuthenticated(false);
     }
   };
 
   const validate = async () => {
-    if (!user || !user.email) return false;
+    if (!user || !user.email) {
+      logger.debug("[Auth Hook] No user found, validation failed");
+      setIsAuthenticated(false);
+      return false;
+    }
 
     try {
-      const response = await fetch(`${API_URL}/validate-session`, {
-        credentials: "include",
+      logger.debug("[Auth Hook] Validating token");
+      const response = await fetch(`${API_URL}/validate-token`, {
+        headers: getAuthHeader(),
       });
-      return response.ok;
+      
+      logger.debug("[Auth Hook] Validation response status:", response.status);
+      if (!response.ok) {
+        logger.debug("[Auth Hook] Token validation failed");
+        localStorage.removeItem('token');
+        clearUser();
+        setIsAuthenticated(false);
+        return false;
+      }
+      
+      const { user: validatedUser } = await response.json();
+      logger.debug("[Auth Hook] Token validated successfully");
+      setUser(validatedUser);
+      setIsAuthenticated(true);
+      return true;
     } catch (error) {
+      logger.error("[Auth Hook] Validation error:", error);
+      localStorage.removeItem('token');
+      clearUser();
+      setIsAuthenticated(false);
       return false;
     }
   };

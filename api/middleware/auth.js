@@ -1,42 +1,26 @@
-import { initializeLucia } from "../db/auth.js";
-
-const lucia = await initializeLucia();
+import { verifyToken } from "../utils/jwt.js";
+import { User } from "../models/User.js";
 
 export const auth = async (req, res, next) => {
-  const cookie = req.header("Cookie") ?? "";
-  const sessionId = lucia.readSessionCookie(cookie);
+  const token = req.header("Authorization")?.replace("Bearer ", "");
 
-  if (!sessionId) {
+  if (!token) {
     req.user = null;
-    req.session = null;
     return next();
   }
 
-  // Bug: Lucia being weird
-  console.log('auth: sessionId', sessionId);
-  const { session, user } = await lucia.validateSession(sessionId);
-  console.log('auth: session', session, 'user', user);
-
-  // Clearing Old Session
-  if (!session) {
-    const blankSessionCookie = lucia.createBlankSessionCookie();
-    res.header("Set-Cookie", blankSessionCookie.serialize(), {
-      append: true,
-    });
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    req.user = null;
+    return next();
   }
 
-  // Session Rotation
-  if (session && session.fresh) {
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    res.header("Set-Cookie", sessionCookie.serialize(), {
-      append: true,
-    });
+  const user = await User.findById(decoded.userId);
+  if (!user) {
+    req.user = null;
+    return next();
   }
 
-  req.session = session;
   req.user = user;
-  
-  // pretend auth middleware and lucia are actually doing their job
-  req.userId = '675b35ae2ba5569947c3b006';
   return next();
 };

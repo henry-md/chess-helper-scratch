@@ -1,8 +1,8 @@
 import { User } from "../models/User.js";
 import { hash, verify } from "@node-rs/argon2";
-import { Router } from 'express';
-import { initializeLucia } from "../db/auth.js";
-import { authGuard } from "../middleware/auth-guard.js";
+import { Router } from "express";
+import { generateToken, verifyToken } from "../utils/jwt.js";
+import logger from "../utils/logger.js";
 
 const authRouter = Router();
 
@@ -13,20 +13,17 @@ const hashOptions = {
   parallelism: 1,
 };
 
-const lucia = await initializeLucia();
-
-authRouter.get("/test-auth", authGuard, async (req, res) => {
-  res.json({ message: 'test' });
-});
-
 authRouter.post("/sign-up", async (req, res) => {
   try {
     const { email, username, password } = req.body;
-    const passwordHash = await hash(password, hashOptions);
+    logger.debug(`[Sign Up] Attempting to create user with email: ${email}`);
 
-    // Could delete later with correct validation
+    const passwordHash = await hash(password, hashOptions);
+    logger.debug("[Sign Up] Password hashed successfully");
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      logger.warn(`[Sign Up] User already exists with email: ${email}`);
       return res.json({ message: "User already exists" });
     }
 
@@ -35,141 +32,145 @@ authRouter.post("/sign-up", async (req, res) => {
       username,
       passwordHash,
     });
+    logger.info(`[Sign Up] User created successfully: ${user._id}`);
 
-    // Create a session
-    const session = await lucia.createSession(user.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    res.setHeader("Set-Cookie", sessionCookie.serialize());
+    // Generate JWT token
+    const token = generateToken(user._id);
+    logger.debug("[Sign Up] JWT token generated");
 
     return res.json({
       success: true,
-      message: "User signed in successfully",
+      message: "User signed up successfully",
       user,
+      token,
     });
   } catch (error) {
-    console.error(error);
+    logger.error("[Sign Up] Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 });
 
 authRouter.post("/sign-in", async (req, res) => {
   try {
     const { email, password } = req.body;
+    logger.debug(`[Sign In] Attempting to sign in with email: ${email}`);
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ 
+      logger.warn(`[Sign In] User not found with email: ${email}`);
+      return res.status(401).json({
         success: false,
-        message: "Incorrect password or email" 
+        message: "Incorrect email or password",
       });
     }
+    logger.debug(`[Sign In] User found: ${user._id}`);
+
+    logger.debug("[Sign In] Starting password verification...");
+    logger.debug(
+      `[Sign In] Stored hash: ${user.passwordHash.substring(0, 10)}...`
+    );
+    logger.debug(`[Sign In] Provided password: ${password.substring(0, 1)}...`);
+
     const validPassword = await verify(
       user.passwordHash,
       password,
       hashOptions
     );
+    logger.debug(`[Sign In] Password verification result: ${validPassword}`);
+
     if (!validPassword) {
+      logger.warn(`[Sign In] Invalid password for user: ${email}`);
       return res.status(401).json({
         success: false,
-        message: "Incorrect password or email",
+        message: "Incorrect email or password",
       });
     }
+    logger.debug("[Sign In] Password verified successfully");
 
-    // Create a session
-    const session = await lucia.createSession(user.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    const serializedSessionCookie = sessionCookie.serialize();
-    res.setHeader("Set-Cookie", serializedSessionCookie, {
-      append: true,
-    });
+    // Generate JWT token
+    const token = generateToken(user._id);
+    logger.debug("[Sign In] JWT token generated");
 
-    // Bug: Lucia being weird
-    // Trying to read the cookie and validate the session in the same way I do in auth to add the userId and session to the req
-    // But i'm not even reading the updated cookie here, and either way lucia won't validate anything.
-    try {
-      // read it directly after
-      const cookie = req.header("Cookie") ?? "";
-      const sessionId = lucia.readSessionCookie(cookie);
-      const res = await lucia.validateSession(sessionId);
-      const resSession = res.session;
-      const resUser = res.user;
-      console.log('sign in route: resSession', resSession);
-      console.log('sign in route: resUser', resUser);
-    } catch (error) {
-      console.error(error);
-    }
-
+    logger.info(`[Sign In] User ${user._id} signed in successfully`);
     return res.json({
       success: true,
       message: "User signed in successfully",
       user,
+      token,
     });
   } catch (error) {
-    console.error(error);
+    logger.error("[Sign In] Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 });
 
 authRouter.post("/sign-out", async (req, res) => {
-  const cookie = req.header("Cookie") ?? "";
-  const sessionId = lucia.readSessionCookie(cookie);
-  if (!sessionId) {
-    return res.json(
-      {
-        success: false,
-        message: "No session found",
-      },
-      401
-    );
-  }
-
-  await lucia.invalidateSession(sessionId);
-  const sessionCookie = lucia.createBlankSessionCookie();
-  res.setHeader("Set-Cookie", sessionCookie.serialize()); // Remove the session cookie from the client
-
-  return res.json(
-    {
-      success: true,
-      message: "You have been signed out!",
-    },
-    200
-  );
+  // With JWT, we don't need to do anything on the server side
+  // The client should remove the token
+  logger.info("[Sign Out] User signed out");
+  return res.json({
+    success: true,
+    message: "Signed out successfully",
+  });
 });
 
-authRouter.get("/validate-session", async (req, res) => {
-  const cookie = req.header("Cookie") ?? "";
-  const sessionId = lucia.readSessionCookie(cookie);
-  if (!sessionId) {
-    return res.json(
-      {
-        success: false,
-        message: "No session found",
-      },
-      401
-    );
+authRouter.get("/validate-token", async (req, res) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  logger.debug(
+    `[Validate Token] Received token: ${token ? "Present" : "Missing"}`
+  );
+
+  if (!token) {
+    logger.warn("[Validate Token] No token provided");
+    return res.status(401).json({
+      success: false,
+      message: "No token provided",
+    });
   }
-  const session = await lucia.validateSession(sessionId);
-  if (!session) {
-    return res.json(
-      {
-        success: false,
-        message: "Invalid session",
-      },
-      401
-    );
+
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    logger.warn("[Validate Token] Invalid token");
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token",
+    });
   }
+  logger.debug(
+    `[Validate Token] Token decoded successfully: ${JSON.stringify(decoded)}`
+  );
+
+  const user = await User.findById(decoded.userId);
+  if (!user) {
+    logger.warn("[Validate Token] User not found for decoded token");
+    return res.status(401).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+  logger.debug(`[Validate Token] User found: ${user._id}`);
 
   return res.json({
     success: true,
-    message: "Session is valid",
+    message: "Token is valid",
+    user,
   });
 });
 
 authRouter.get("/users", async (req, res) => {
   try {
     const users = await User.find();
+    logger.debug(`[Users] Retrieved ${users.length} users`);
     res.status(200).json({ users, success: true });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching users", success: false });
+    logger.error("[Users] Error fetching users:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 

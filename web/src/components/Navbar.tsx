@@ -1,20 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useStore } from '@nanostores/react';
 import useAuth from "@/hooks/use-auth.jsx";
+import { $isAuthenticated } from '@/store/auth';
 
 const Navbar = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { validate, logout } = useAuth();
-
-  useEffect(() => {
-    const checkValidation = async () => {
-      const isValidated = await validate();
-      setIsAuthenticated(isValidated);
-    }
-    checkValidation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useAuth]);
-
+  const isAuthenticated = useStore($isAuthenticated);
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   return (
