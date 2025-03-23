@@ -3,15 +3,10 @@ import { $user, clearUser, setUser } from "@/store/auth";
 import { API_URL } from "@/env";
 import logger from "@/utils/logger";
 import { setIsAuthenticated } from "@/store/auth";
+import { getAuthHeader } from "@/utils/auth";
 
 function useAuth() {
   const user = useStore($user);
-
-  const getAuthHeader = (): Record<string, string> => {
-    const token = localStorage.getItem('token');
-    logger.debug("[Auth Hook] Getting auth header:", token ? "Token present" : "No token");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
 
   const register = async (email: string, username: string, password: string) => {
     try {

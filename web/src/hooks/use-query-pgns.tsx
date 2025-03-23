@@ -7,6 +7,7 @@ import {
 } from "@/lib/store";
 import { API_URL } from "@/env";
 import { toast } from "react-toastify";
+import { getAuthHeader } from "@/utils/auth";
 
 function useQueryPgns() {
   const pgns = useStore($pgns);
@@ -19,7 +20,7 @@ function useQueryPgns() {
 
       const response = await fetch(`${API_URL}/pgns`, {
         method: "GET",
-        credentials: "include",
+        headers: getAuthHeader(),
       });
       const { pgns } = await response.json();
       setPgns(pgns);

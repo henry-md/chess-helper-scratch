@@ -1,5 +1,6 @@
 import { verifyToken } from "../utils/jwt.js";
 import { User } from "../models/User.js";
+import logger from "../utils/logger.js";
 
 export const auth = async (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -21,6 +22,11 @@ export const auth = async (req, res, next) => {
     return next();
   }
 
-  req.user = user;
+  logger.debug(`[Auth]: User ${user.username} authenticated`);
+  req.user = {
+    id: user._id,
+    username: user.username,
+    email: user.email,
+  };
   return next();
 };

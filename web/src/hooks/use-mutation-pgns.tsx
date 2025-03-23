@@ -1,14 +1,14 @@
 import { API_URL } from "@/env";
 import { toast } from "react-toastify";
 import { addPgn, updatePgn, triggerPgnsRefresh } from "@/lib/store";
+import { getAuthHeader } from "@/utils/auth";
 
 function useMutationPgns() {
   const createPgn = async (title: string, pgn: string, notes: string) => {
     try {
       const response = await fetch(`${API_URL}/pgns`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: getAuthHeader(),
         body: JSON.stringify({ title, pgn, notes }),
       });
       const { newPgn } = await response.json();
@@ -24,8 +24,7 @@ function useMutationPgns() {
     try {
       const response = await fetch(`${API_URL}/pgn/${pgnId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: getAuthHeader(),
         body: JSON.stringify({ title, pgn, notes }),
       });
       const { pgn: updatedPgn } = await response.json();
@@ -41,7 +40,7 @@ function useMutationPgns() {
     try {
       await fetch(`${API_URL}/pgn/${pgnId}`, { 
         method: "DELETE", 
-        credentials: "include" 
+        headers: getAuthHeader(),
       });
       // deletePgn(pgnId);
       triggerPgnsRefresh();
