@@ -22,16 +22,16 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
       <p className="pb-2 text-center">{gameTitle}</p>
       <div className="relative">
         {/* Edit and Delete buttons */}
-        <div className="absolute top-[5px] right-[-20px] z-50 flex flex-col gap-2">
+        <div className="absolute top-[5px] right-[-35px] z-50 flex flex-col gap-4">
           <button 
             onClick={() => setEditDialogOpen(true)}
-            className="text-white bg-gray-900 rounded-[100%] w-[22px] h-[22px] flex items-center justify-center">
-              <FontAwesomeIcon className="w-[12px] h-[12px]" icon={faPenToSquare} />
+            className="text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
+              <FontAwesomeIcon className="w-[14px] h-[14px]" icon={faPenToSquare} />
           </button>
           <button 
             onClick={() => setDeleteDialogOpen(true)}
-            className="text-white bg-gray-900 rounded-[100%] w-[22px] h-[22px] flex items-center justify-center">
-              <FontAwesomeIcon className="w-[12px] h-[12px]" icon={faTrash} />
+            className="text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
+              <FontAwesomeIcon className="w-[14px] h-[14px]" icon={faTrash} />
           </button>
         </div>
 

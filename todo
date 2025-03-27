@@ -5,3 +5,7 @@ Todo
 
 Future ideas
 - Allow folders to group pgn's
+
+Things to ask in next meeting
+- How do you suggest I migrate backend to ts
+- Do you think I could separate the code in components/chess-app.tsx so that it's less cluttered?
