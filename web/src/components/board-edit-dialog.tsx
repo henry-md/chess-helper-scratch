@@ -9,11 +9,12 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { PgnType } from "@/lib/types";
 import useMutationPgns from "@/hooks/use-mutation-pgns";
-import { triggerPgnsRefresh } from "@/lib/store";
+import { triggerPgnsRefresh } from "@/store/pgn";
+import logger from "@/utils/logger";
 
 type EditPgnDialogProps = {
   pgn: PgnType;
@@ -27,12 +28,22 @@ const EditPgnDialog = ({ pgn, open, setEditDialogOpen }: EditPgnDialogProps) => 
   const [notes, setNotes] = useState(pgn.notes);
   const { updatePgnContent } = useMutationPgns();
 
+  // Reset values when dialog is closed
+  useEffect(() => {
+    if (!open) {
+      setTitle(pgn.title);
+      setPgnString(pgn.pgn);
+      setNotes(pgn.notes);
+    }
+  }, [open, pgn]);
+
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    logger.debug(`[handleSave] Saving PGN ${pgn._id} with title ${title} and pgn ${pgnString} and notes ${notes}`);
     e.preventDefault();
     if (title.length === 0 || pgnString.length === 0) {
       toast.error("Sorry! Title and PGN cannot be empty 😕");
     } else {
-      await updatePgnContent(pgn._id, title, pgnString, notes);
+      await updatePgnContent(pgn._id, { title, pgn: pgnString, notes });
       triggerPgnsRefresh();
       setEditDialogOpen(false);
     }

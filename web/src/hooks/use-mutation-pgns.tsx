@@ -1,14 +1,18 @@
 import { API_URL } from "@/env";
 import { toast } from "react-toastify";
-import { addPgn, updatePgn, triggerPgnsRefresh } from "@/lib/store";
+import { addPgn, updatePgn, triggerPgnsRefresh } from "@/store/pgn";
 import { getAuthHeader } from "@/utils/auth";
+import logger from "@/utils/logger";
 
 function useMutationPgns() {
   const createPgn = async (title: string, pgn: string, notes: string = "", isPublic: boolean = false) => {
     try {
       const response = await fetch(`${API_URL}/pgns`, {
         method: "POST",
-        headers: getAuthHeader(),
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ title, pgn, notes, isPublic }),
       });
       const { newPgn } = await response.json();
@@ -29,10 +33,14 @@ function useMutationPgns() {
       isPublic?: boolean;
     }
   ) => {
+    logger.debug(`[useMutationPgns] Updating PGN ${pgnId} with ${JSON.stringify(updates)}`);
     try {
       const response = await fetch(`${API_URL}/pgn/${pgnId}`, {
         method: "PATCH",
-        headers: getAuthHeader(),
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(updates),
       });
       const { pgn: updatedPgn } = await response.json();
@@ -50,7 +58,6 @@ function useMutationPgns() {
         method: "DELETE", 
         headers: getAuthHeader(),
       });
-      // deletePgn(pgnId);
       triggerPgnsRefresh();
     } catch (error) {
       console.error(error);

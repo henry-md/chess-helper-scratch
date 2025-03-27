@@ -66,7 +66,7 @@ authRouter.post("/sign-in", async (req, res) => {
         message: "Incorrect email or password",
       });
     }
-    logger.debug(`[Sign In] User found: ${user._id}`);
+    logger.debug(`[Sign In] User found: ${user.username}`);
 
     logger.debug("[Sign In] Starting password verification...");
     logger.debug(
@@ -154,7 +154,7 @@ authRouter.get("/validate-token", async (req, res) => {
       message: "User not found",
     });
   }
-  logger.debug(`[Validate Token] User found: ${user._id}`);
+  logger.debug(`[Validate Token] User found: ${user.username}`);
 
   return res.json({
     success: true,

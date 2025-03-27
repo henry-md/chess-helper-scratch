@@ -3,15 +3,20 @@ import Board from "./board";
 import { Chess } from "chess.js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
+import { useStore } from '@nanostores/react'
+import { $isPlayingWhite, $isSkipping, $currentPgn, setIsPlayingWhite, setIsSkipping, setCurrentPgn } from '../store/chess-settings'
+import { $mainlines, setMainlines } from '../store/chess-app'
+import { pgnToMainlines, findNumMovesToFirstBranch } from '../utils/chess/pgn-parser'
 
 function ChessApp() {
-  const [textareaContent, setTextareaContent] = useState('');
-  const [mainlines, setMainlines] = useState([]);
-  const [isPlayingWhite, setIsPlayingWhite] = useState(true);
-  const [isSkipping, setIsSkipping] = useState(false);
   const [numMovesToFirstBranch, setNumMovesToFirstBranch] = useState(0);
-  
   const [currFen, setCurrFen] = useState('');
+  
+  const isPlayingWhite = useStore($isPlayingWhite);
+  const isSkipping = useStore($isSkipping);
+  const currentPgn = useStore($currentPgn);
+  const mainlines = useStore($mainlines);
+  
   const chessRef = useRef(new Chess());
   const movesRef = useRef([]);
   const currMoveIdxRef = useRef(-1);
@@ -20,83 +25,13 @@ function ChessApp() {
 
   const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     console.log('content', event.target.value);
-    setTextareaContent(event.target.value);
+    setCurrentPgn(event.target.value);
     if (event.target.value === '') return
     setMainlines(pgnToMainlines(event.target.value));
     setNumMovesToFirstBranch(findNumMovesToFirstBranch(event.target.value));
     console.log('mainlines', pgnToMainlines(event.target.value));
   };
-
-  const findNumMovesToFirstBranch = (pgn) => {
-    let numMoves = 0;
-    const moves = pgn.split(/\s+/).filter(token => token.trim() !== '');
-    console.log('moves', moves);
-    for (const move of moves) {
-      // if the first character is a number, continue
-      if (/[0-9]/.test(move[0])) continue;
-      if (move.includes('(')) break;
-      numMoves++;
-    }
-    return numMoves - 1;
-  };
-
-  // turns a nested pgn into a set of mainline pgns.
-  const pgnToMainlines = (pgn) => {
-    const mainlines = [];
-    const moves = pgn.split(/\s+/).filter(token => token.trim() !== '');
-    
-    // returns [line_end_idx, [line,]]
-    const backtrack = (index, currentLine) => {
-      let i = index;
-      let addBack;
-      while (i < moves.length) {
-        const move = moves[i];
-        if (move === '(') {
-          // enter backtrack
-          addBack = currentLine.pop();
-          const [newIndex, sublines] = backtrack(i + 1, currentLine.slice());
-          currentLine.push(addBack);
-          mainlines.push(...sublines);
-          i = newIndex;
-        } else if (move === ')') {
-          // return from backtrack
-          return [i, [currentLine.join(' ')]];
-        } else if (!move.includes('...')) {
-          // It's an actual move
-          currentLine.push(move);
-        }
-        i++;
-      }
-      // Reached end of pgn
-      mainlines.push(currentLine.join(' '));
-      return [i, []];
-    };
   
-    backtrack(0, []);
-    // mainlinesToTree(mainlines);
-    return mainlines.reverse();
-  };
-
-  // const mainlinesToTree = (mainlines) => {
-  //   console.log('mainlines', mainlines);
-  //   const tree = {};
-  //   for (const line of mainlines) {
-  //     // check that move does not have any numerical character in it, and is not empty
-  //     const moves = line.split(' ').filter(move => !/[0-9]/.test(move) && move !== '');
-  //     console.log('line', line);
-  //     console.log('moves', moves);
-  //     break;
-  //     let currNode = tree;
-  //     for (const move of moves) {
-  //       if (!currNode[move]) {
-  //         currNode[move] = {};
-  //       }
-  //       currNode = currNode[move];
-  //     }
-  //   }
-  //   return tree;
-  // };
-
   const handleKeyDown = useCallback((event) => {
     if (event.key === 'ArrowRight' && currMoveIdxRef.current < maxMoveIdxRef.current) {
       currMoveIdxRef.current++;
@@ -206,14 +141,21 @@ function ChessApp() {
     return false;
   };
 
-  // when the user changes the isPlayingWhite state, return currMoveIdxRef and maxMoveIdxRef to -1, and change lineIdxRef to 0
+  // set mainlines when currentPgn changes
+  useEffect(() => {
+    setMainlines(pgnToMainlines(currentPgn));
+    setNumMovesToFirstBranch(findNumMovesToFirstBranch(currentPgn));
+  }, [currentPgn]);
+
+  // Restart game if user changes playing color
   useEffect(() => {
     currMoveIdxRef.current = -1;
     maxMoveIdxRef.current = -1;
     lineIdxRef.current = 0;
     loadNextGame();
-  }, [isPlayingWhite, loadNextGame]);
+  }, [isPlayingWhite, isSkipping]);
 
+  // Handle keyboard events
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -239,7 +181,7 @@ function ChessApp() {
             Hint
           </button>
           <textarea 
-            value={textareaContent}
+            value={currentPgn}
             onChange={handleTextareaChange}
             className="p-2 border border-gray-300 rounded h-[400px]"
             placeholder="Type here..."
@@ -252,7 +194,7 @@ function ChessApp() {
             ></button>
             <button 
               className={`w-[25px] h-[25px] bg-[#b58863] rounded-md ${!isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
-              onClick={() => {setIsPlayingWhite(false)}}
+              onClick={() => setIsPlayingWhite(false)}
             ></button>
           </div>
           <div className="flex flex-row items-center justify-center gap-2">

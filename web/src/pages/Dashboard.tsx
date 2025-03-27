@@ -2,7 +2,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Navbar from "../components/navbar";
 import BoardPreview from "../components/board-preview";
 import { useStore } from "@nanostores/react";
-import { $user } from "@/lib/store";
+import { $user } from "@/store/user";
 import { useEffect } from "react";
 import useQueryPgns from "@/hooks/use-query-pgns";
 import { useNavigate } from "react-router-dom";
@@ -11,18 +11,13 @@ const Dashboard = () => {
   const user = useStore($user);
   const { pgns } = useQueryPgns();
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     toast(`Welcome ${user.username}!`, {
       position: "bottom-right",
     });
   }, [user]);
-
-  // return (
-  //   <>
-  //     <div>Hello, world!</div>
-  //   </>
-  // )
 
   return (
     <>

@@ -55,6 +55,7 @@ pgnRouter.post("/pgn", authGuard, async (req, res) => {
 });
 
 pgnRouter.patch("/pgn/:id", authGuard, async (req, res) => {
+  logger.debug(`[pgnRouter] Patching PGN ${req.params.id} with ${JSON.stringify(req.body)}`);
   try {
     const { id } = req.params;
 

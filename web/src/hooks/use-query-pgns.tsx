@@ -4,7 +4,7 @@ import {
   setPgns,
   $pgns,
   $refreshPgnsTrigger,
-} from "@/lib/store";
+} from "@/store/pgn";
 import { API_URL } from "@/env";
 import { toast } from "react-toastify";
 import { getAuthHeader } from "@/utils/auth";
