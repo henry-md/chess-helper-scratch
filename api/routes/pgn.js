@@ -10,6 +10,17 @@ pgnRouter.get("/test-pgn", async (req, res) => {
   res.status(200).json({ message: "Hello Pgn", success: true });
 });
 
+pgnRouter.get("/pgn/:id", authGuard, async (req, res) => {
+  const { id } = req.params;
+  const pgn = await Pgn.findById(id);
+  if (!pgn) {
+    return res.status(404).json({ message: "PGN not found", success: false });
+  } else if (pgn.userId !== String(req.user.id)) {
+    return res.status(403).json({ message: "You are not authorized to access this PGN", success: false });
+  }
+  res.status(200).json({ pgn, success: true });
+});
+
 pgnRouter.get("/pgns", authGuard, async (req, res) => {
   try {
     const pgns = await Pgn.find({ userId: req.user.id });

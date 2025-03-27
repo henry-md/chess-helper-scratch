@@ -10,6 +10,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import { $isAuthenticated, setIsAuthenticated } from "./store/auth";
 import { useStore } from "@nanostores/react";
+import Game from "./pages/game";
 
 function App() {
   const { validate } = useAuth();
@@ -39,6 +40,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/game/:id" element={<Game />} />
       </Routes>
     </div>
   );

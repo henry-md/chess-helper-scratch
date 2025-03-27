@@ -4,18 +4,18 @@ import { Chess } from "chess.js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 import { useStore } from '@nanostores/react'
-import { $isPlayingWhite, $isSkipping, $currentPgn, setIsPlayingWhite, setIsSkipping, setCurrentPgn } from '../store/chess-settings'
-import { $mainlines, setMainlines } from '../store/chess-app'
+import { $isPlayingWhite, $isSkipping, setIsPlayingWhite, setIsSkipping } from '../store/chess-settings'
+import { $currentPgnObject, updateCurrentPgn, $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/chess-app'
 import { pgnToMainlines, findNumMovesToFirstBranch } from '../utils/chess/pgn-parser'
 
 function ChessApp() {
-  const [numMovesToFirstBranch, setNumMovesToFirstBranch] = useState(0);
   const [currFen, setCurrFen] = useState('');
   
   const isPlayingWhite = useStore($isPlayingWhite);
   const isSkipping = useStore($isSkipping);
-  const currentPgn = useStore($currentPgn);
   const mainlines = useStore($mainlines);
+  const currentPgnObject = useStore($currentPgnObject);
+  const numMovesToFirstBranch = useStore($numMovesToFirstBranch);
   
   const chessRef = useRef(new Chess());
   const movesRef = useRef([]);
@@ -23,13 +23,30 @@ function ChessApp() {
   const maxMoveIdxRef = useRef(-1);
   const lineIdxRef = useRef(0);
 
-  const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log('content', event.target.value);
-    setCurrentPgn(event.target.value);
-    if (event.target.value === '') return
-    setMainlines(pgnToMainlines(event.target.value));
-    setNumMovesToFirstBranch(findNumMovesToFirstBranch(event.target.value));
-    console.log('mainlines', pgnToMainlines(event.target.value));
+  const handleTextareaChange = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newPgn = event.target.value;
+    if (!currentPgnObject) return;
+
+    // Update the PGN in both database and store
+    const success = await updateCurrentPgn(
+      currentPgnObject._id,
+      currentPgnObject.title,
+      newPgn,
+      currentPgnObject.notes
+    );
+
+    if (success) {
+      // Reset the game with new PGN
+      // setCurrentPgn(newPgn);
+      setMainlines(pgnToMainlines(newPgn));
+      setNumMovesToFirstBranch(findNumMovesToFirstBranch(newPgn));
+      
+      // Reset game state
+      currMoveIdxRef.current = -1;
+      maxMoveIdxRef.current = -1;
+      lineIdxRef.current = 0;
+      loadNextGame();
+    }
   };
   
   const handleKeyDown = useCallback((event) => {
@@ -141,19 +158,13 @@ function ChessApp() {
     return false;
   };
 
-  // set mainlines when currentPgn changes
-  useEffect(() => {
-    setMainlines(pgnToMainlines(currentPgn));
-    setNumMovesToFirstBranch(findNumMovesToFirstBranch(currentPgn));
-  }, [currentPgn]);
-
-  // Restart game if user changes playing color
+  // Restart game if settings change, or mainlines change
   useEffect(() => {
     currMoveIdxRef.current = -1;
     maxMoveIdxRef.current = -1;
     lineIdxRef.current = 0;
     loadNextGame();
-  }, [isPlayingWhite, isSkipping]);
+  }, [isPlayingWhite, isSkipping, mainlines]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -181,7 +192,7 @@ function ChessApp() {
             Hint
           </button>
           <textarea 
-            value={currentPgn}
+            value={currentPgnObject?.pgn || ''}
             onChange={handleTextareaChange}
             className="p-2 border border-gray-300 rounded h-[400px]"
             placeholder="Type here..."

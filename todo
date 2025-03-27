@@ -1,23 +1,7 @@
-bugs
-- Lucia: cookies is not being set properly in navbar after sign in, so you're signed in but it still gives "login" and "signup" options.
-- Shadcn: the inputs are no where near the same as when I downloaded on HW7. Dialog in particular — x out doesn't work, all black, even placeholder text doesn't dissapear in edit dialog. 
-
-not to forget later
-- Add authGuard back later to routes after I can get Lucia to work
-
+Bugs
 
 Todo
-- allow crud operations on dashboard pgn's w/ edit and delete buttons
-- Implement gameplay as a tree instead of 2d list
-- Allow ability to save game by saving the remaining tree
-[deadline 3 done]
-- Add predictability scale by adding weighting attribute to nodes
-- Look into api for chess engine to play "Why Not"
-[deadline 4 done]
-
+- Add the http request that happens in <Game> to a hook.
 
 Future ideas
 - Allow folders to group pgn's
-
-Not to forget
-- I have some sort of editPgn in store but not deletePgn... weird.
