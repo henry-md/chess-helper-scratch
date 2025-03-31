@@ -3,11 +3,22 @@ import { toast } from "react-toastify";
 import { addPgn, updatePgn, triggerPgnsRefresh } from "@/store/pgn";
 import { getAuthHeader } from "@/utils/auth";
 import logger from "@/utils/logger";
+import { formatError } from "@/utils/error";
 
 function useMutationPgns() {
-  const createPgn = async (title: string, pgn: string, notes: string = "", isPublic: boolean = false) => {
+  const createPgn = async ({
+    title,
+    pgn,
+    notes = "",
+    isPublic = false 
+  }: {
+    title: string;
+    pgn: string;
+    notes?: string;
+    isPublic?: boolean;
+  }) => {
     try {
-      const response = await fetch(`${API_URL}/pgns`, {
+      const response = await fetch(`${API_URL}/pgn`, {
         method: "POST",
         headers: {
           ...getAuthHeader(),
@@ -15,12 +26,21 @@ function useMutationPgns() {
         },
         body: JSON.stringify({ title, pgn, notes, isPublic }),
       });
-      const { newPgn } = await response.json();
-      addPgn(newPgn);
-      triggerPgnsRefresh();
+      
+      logger.debug(`[useMutationPgns] Creating PGN "${title}" with pgn "${pgn}" and notes "${notes}" and isPublic "${isPublic}"; response: ${JSON.stringify(response)}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        toast.error(formatError(data));
+        return undefined;
+      } else {
+        addPgn(data.pgn);
+        triggerPgnsRefresh();
+        return data.pgn;
+      }
     } catch (error) {
-      console.error(error);
       toast.error("Error adding PGN");
+      return undefined;
     }
   }
 

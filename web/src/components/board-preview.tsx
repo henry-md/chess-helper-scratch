@@ -16,20 +16,30 @@ interface BoardPreviewProps {
 const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  
+
+  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setEditDialogOpen(true);
+  }
+
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setDeleteDialogOpen(true);
+  }
+
   return (
-    <div className="cursor-pointer">
+    <a href={`/game/${pgn._id}`} target="_blank" className="cursor-pointer">
       <p className="pb-2 text-center">{gameTitle}</p>
       <div className="relative">
         {/* Edit and Delete buttons */}
         <div className="absolute top-[5px] right-[-35px] z-50 flex flex-col gap-4">
           <button 
-            onClick={() => setEditDialogOpen(true)}
+            onClick={handleEdit}
             className="text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
               <FontAwesomeIcon className="w-[14px] h-[14px]" icon={faPenToSquare} />
           </button>
           <button 
-            onClick={() => setDeleteDialogOpen(true)}
+            onClick={handleDelete}
             className="text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
               <FontAwesomeIcon className="w-[14px] h-[14px]" icon={faTrash} />
           </button>
@@ -54,7 +64,7 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
       </div>
       <EditPgnDialog pgn={pgn} open={editDialogOpen} setEditDialogOpen={setEditDialogOpen} />
       <DeletePgnDialog pgn={pgn} open={deleteDialogOpen} setDeleteDialogOpen={setDeleteDialogOpen} />
-    </div>
+    </a>
   )
 };
 

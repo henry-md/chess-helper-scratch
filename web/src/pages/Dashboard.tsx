@@ -3,14 +3,18 @@ import Navbar from "../components/navbar";
 import BoardPreview from "../components/board-preview";
 import { useStore } from "@nanostores/react";
 import { $user } from "@/store/user";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useQueryPgns from "@/hooks/use-query-pgns";
-import { useNavigate } from "react-router-dom";
+import AddPgnDialog from "@/components/board-add-dialog";
 
 const Dashboard = () => {
   const user = useStore($user);
   const { pgns } = useQueryPgns();
-  const navigate = useNavigate();
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+
+  const handleNewStudy = async () => {
+    setAddDialogOpen(true);
+  }
 
   useEffect(() => {
     toast(`Welcome ${user.username}!`, {
@@ -29,7 +33,7 @@ const Dashboard = () => {
               <BoardPreview key={index} pgn={pgn} gameTitle={pgn.title} isWhite={index % 2 === 0} />
             ))
           }
-          <div onClick={() => navigate("/")} className="cursor-pointer">
+          <div onClick={handleNewStudy} className="cursor-pointer">
             <p className="pb-2 text-center">New Study</p>
             <div className="relative flex items-center justify-center w-full bg-gray-200 rounded-md aspect-square group">
               <div className="absolute inset-0 transition-opacity bg-black rounded-md opacity-0 group-hover:opacity-[0.08]"></div>
@@ -41,6 +45,7 @@ const Dashboard = () => {
         </div>
       </div>
       <ToastContainer />
+      <AddPgnDialog open={addDialogOpen} setAddDialogOpen={setAddDialogOpen} />
     </>
   );
 };
