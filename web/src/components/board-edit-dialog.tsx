@@ -50,7 +50,7 @@ const EditPgnDialog = ({ pgn, open, setEditDialogOpen }: EditPgnDialogProps) => 
   };
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={setEditDialogOpen}>
       <DialogContent>
         <form className="grid w-full gap-1.5 p-1 pr-3">
           <DialogTitle>Edit PGN</DialogTitle>

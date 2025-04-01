@@ -48,7 +48,7 @@ const AddPgnDialog = ({ open, setAddDialogOpen }: AddPgnDialogProps) => {
   };
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={setAddDialogOpen}>
       <DialogContent>
         <form className="grid w-full gap-1.5 p-1 pr-3">
           <DialogTitle>Add PGN</DialogTitle>

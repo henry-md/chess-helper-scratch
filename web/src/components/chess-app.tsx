@@ -7,6 +7,10 @@ import { useStore } from '@nanostores/react'
 import { $isPlayingWhite, $isSkipping, setIsPlayingWhite, setIsSkipping } from '../store/chess-settings'
 import { $currentPgnObject, updateCurrentPgn, $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/chess-app'
 import { pgnToMainlines, findNumMovesToFirstBranch } from '../utils/chess/pgn-parser'
+import { cn } from '../lib/utils'
+import { NODE_ENV } from "@/env";
+
+const debug = NODE_ENV === "development";
 
 function ChessApp() {
   const [currFen, setCurrFen] = useState('');
@@ -176,27 +180,45 @@ function ChessApp() {
 
   return (
     <>
-      <div className="w-full h-[100vh] flex justify-center items-center">
-        <div className="w-[600px]">
-          <Board 
+      <div className={cn(
+        "w-full h-[100vh] flex justify-center items-center gap-4"
+      )}>
+        {/* Board */}
+        <div style={{ width: 'min(90vh, 70vw)' }}>
+          <Board
             currFen={currFen} 
             onPieceDrop={onDrop}
             isWhite={isPlayingWhite}
           />
         </div>
-        <div className="flex flex-col items-center justify-center gap-2 px-3">
-          <button 
-            className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100"
-            onClick={getHint}
-          >
-            Hint
-          </button>
-          <textarea 
-            value={currentPgnObject?.pgn || ''}
-            onChange={handleTextareaChange}
-            className="p-2 border border-gray-300 rounded h-[400px]"
-            placeholder="Type here..."
-          />
+
+        {/* Aside */}
+        <div className={cn(
+          "flex flex-col items-center justify-center gap-2",
+          debug && "border border-red-500"
+        )} style={{ width: 'min(30vw, 400px)', height: 'min(90vh, 70vw)' }}>
+          
+          {/* Title Notes Pgn */}
+          <div className={cn(
+            "flex-grow flex flex-col h-full items-center w-full gap-3 p-3",
+            debug && "border border-blue-500"
+          )}>
+            <h3 className="text-2xl">{currentPgnObject?.title}</h3>
+            <textarea
+              value={currentPgnObject?.notes || ''}
+              onChange={handleTextareaChange}
+              className="w-full p-2 border border-gray-300 rounded h-fit"
+              placeholder="Type here..."
+            />
+            <textarea 
+              value={currentPgnObject?.pgn || ''}
+              onChange={handleTextareaChange}
+              className="flex-grow w-full h-full p-2 border border-gray-300 rounded"
+              placeholder="Type here..."
+            />
+          </div>
+          
+          {/* Game Settings */}
           <div className="flex flex-row items-center justify-center gap-2">
             Play as:
             <button 
@@ -220,6 +242,14 @@ function ChessApp() {
               />
             </button>
           </div>
+
+          {/* Hint Button */}
+          <button 
+            className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100"
+            onClick={getHint}
+          >
+            Hint
+          </button>
         </div>
       </div>
     </>
