@@ -9,16 +9,19 @@ import { $currentPgnObject, updateCurrentPgn, $mainlines, setMainlines, $numMove
 import { pgnToMainlines, findNumMovesToFirstBranch } from '../utils/chess/pgn-parser'
 import { cn } from '../lib/utils'
 import { NODE_ENV } from "@/env";
+import EditPgnDialog from './board-edit-dialog';
+import { PgnType } from '@/lib/types';
 
 const debug = NODE_ENV === "development";
 
 function ChessApp() {
   const [currFen, setCurrFen] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   
   const isPlayingWhite = useStore($isPlayingWhite);
   const isSkipping = useStore($isSkipping);
   const mainlines = useStore($mainlines);
-  const currentPgnObject = useStore($currentPgnObject);
+  const currentPgnObject: PgnType | null = useStore($currentPgnObject);
   const numMovesToFirstBranch = useStore($numMovesToFirstBranch);
   
   const chessRef = useRef(new Chess());
@@ -184,7 +187,7 @@ function ChessApp() {
         "w-full h-[100vh] flex justify-center items-center gap-4"
       )}>
         {/* Board */}
-        <div style={{ width: 'min(90vh, 70vw)' }}>
+        <div style={{ width: 'min(80vh, 70vw)' }}>
           <Board
             currFen={currFen} 
             onPieceDrop={onDrop}
@@ -196,14 +199,19 @@ function ChessApp() {
         <div className={cn(
           "flex flex-col items-center justify-center gap-2",
           debug && "border border-red-500"
-        )} style={{ width: 'min(30vw, 400px)', height: 'min(90vh, 70vw)' }}>
+        )} style={{ width: 'min(30vw, 400px)', height: 'min(80vh, 70vw)' }}>
           
           {/* Title Notes Pgn */}
           <div className={cn(
-            "flex-grow flex flex-col h-full items-center w-full gap-3 p-3",
+            "flex-grow flex flex-col h-full items-center w-full gap-3 p-3 pt-0",
             debug && "border border-blue-500"
           )}>
-            <h3 className="text-2xl">{currentPgnObject?.title}</h3>
+            <div className="flex flex-row items-center justify-between w-full">
+              <h3 className="text-2xl">{currentPgnObject?.title}</h3>
+              <button onClick={() => setEditDialogOpen(true)}>
+                <i className="fa-regular fa-pen-to-square"></i>
+              </button>
+            </div>
             <textarea
               value={currentPgnObject?.notes || ''}
               onChange={handleTextareaChange}
@@ -222,11 +230,11 @@ function ChessApp() {
           <div className="flex flex-row items-center justify-center gap-2">
             Play as:
             <button 
-              className={`w-[25px] h-[25px] bg-[#f0d9b5] rounded-md ${isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
+              className={`w-[25px] h-[25px] bg-[var(--board-light-green)] rounded-md ${isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
               onClick={() => setIsPlayingWhite(true)}
             ></button>
             <button 
-              className={`w-[25px] h-[25px] bg-[#b58863] rounded-md ${!isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
+              className={`w-[25px] h-[25px] bg-[var(--board-green)] rounded-md ${!isPlayingWhite ? 'border-2 border-[#827662]' : ''} box-border`} 
               onClick={() => setIsPlayingWhite(false)}
             ></button>
           </div>
@@ -252,6 +260,9 @@ function ChessApp() {
           </button>
         </div>
       </div>
+      {currentPgnObject && (
+        <EditPgnDialog pgn={currentPgnObject} open={editDialogOpen} setEditDialogOpen={setEditDialogOpen} />
+      )}
     </>
   );
 }

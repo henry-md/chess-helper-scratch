@@ -1,6 +1,7 @@
 import { persistentAtom } from '@nanostores/persistent'
 import { PgnType } from "@/lib/types";
 import { updatePgn } from "./pgn";
+import logger from '@/utils/logger';
 
 export const $currentPgnObject = persistentAtom<PgnType | null>('current-pgn-object', null, {
   encode: (value) => JSON.stringify(value),
@@ -13,7 +14,10 @@ export const $numMovesToFirstBranch = persistentAtom<number>('num-moves-to-first
 });
 
 export const setCurrentPgnObject = (pgn: PgnType | null) => {
-  $currentPgnObject.set(pgn);
+  logger.info('[chess-app.ts nano] Setting current PGN object:', pgn);
+  // If pgn is not null, create a new object reference to trigger a re-render
+  const newPgn = pgn ? {...pgn} : null;
+  $currentPgnObject.set(newPgn);
 };
 
 export const updateCurrentPgn = async (pgnId: string, title: string, pgn: string, notes: string) => {

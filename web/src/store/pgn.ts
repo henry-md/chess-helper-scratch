@@ -1,10 +1,11 @@
-import { persistentMap } from "@nanostores/persistent";
+import { persistentAtom } from "@nanostores/persistent";
 import { PgnType } from "@/lib/types";
 import { atom } from "nanostores";
+import logger from "@/utils/logger";
 
 const defaultPgns: PgnType[] = [];
 
-export const $pgns = persistentMap<PgnType[]>("pgns:", defaultPgns, {
+export const $pgns = persistentAtom<PgnType[]>("pgns:", defaultPgns, {
   encode: JSON.stringify,
   decode: JSON.parse
 });
@@ -15,14 +16,15 @@ export const addPgn = (pgn: PgnType) => {
   $pgns.set([...$pgns.get(), pgn]);
 };
 export const updatePgn = (pgnId: string, title: string, pgn: string, notes: string) => {
-  $pgns.set(
-    $pgns.get().map((pgnObj) => {
-      if (pgnObj._id === pgnId) {
-        return { ...pgnObj, title, pgn, notes };
-      }
-      return pgnObj;
-    })
-  );
+  logger.info('[pgn.ts nano] Updating PGN:', pgnId, title, pgn, notes);
+  const currentPgns = $pgns.get();
+  const updatedPgns = currentPgns.map((pgnObj) => {
+    if (pgnObj._id === pgnId) {
+      return { ...pgnObj, title, pgn, notes };
+    }
+    return pgnObj;
+  });
+  $pgns.set(updatedPgns);
 };
 export const clearPgns = () => {
   $pgns.set(defaultPgns);
