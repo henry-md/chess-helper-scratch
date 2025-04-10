@@ -1,26 +1,46 @@
-// turns a nested pgn into a set of mainline pgns.
+import util from 'util';
+
+interface MoveNode {
+  move: string;
+  moveNum: number;
+  isWhite: boolean;
+  fen: string;
+  children: MoveNode[];
+  parent: MoveNode | null;
+  numLeafChildren: number;
+}
+
+// Turns a nested pgn into a set of mainline pgns.
 export const pgnToMainlines = (pgn: string) => {
   const mainlines: string[] = [];
-  const moves = pgn.split(/\s+/).filter(token => token.trim() !== '');
+  const tokens = pgn.split(/\s+/).filter(token => token.trim() !== '');
   
-  // returns [line_end_idx, [line,]]
-  const backtrack = (index: number, currentLine: string[]) => {
-    let i = index;
-    let addBack: string;
-    while (i < moves.length) {
-      const move = moves[i];
+  /**
+   * Recursively processes PGN tokens to extract mainlines, handling variations (parentheses).
+   * 
+   * @param i - Current position in the tokens array
+   * @param currentLine - Array of moves in the current line being built
+   * @returns Tuple containing [endIndex, sublines]; endIndex is the index of end parenthesis 
+   *          where the outer variation ended; sublines is an array of complete move sequences 
+   *          from this variation
+   */
+  const backtrack = (i: number, currentLine: string[]): [number, string[]] => {
+    while (i < tokens.length) {
+      const move = tokens[i];
+      // Backtrack on opening parenthesis and deep copy currentLine
       if (move === '(') {
-        // enter backtrack
-        addBack = currentLine.pop();
+        let addBack: string = currentLine.pop() || '';
         const [newIndex, sublines] = backtrack(i + 1, currentLine.slice());
         currentLine.push(addBack);
         mainlines.push(...sublines);
         i = newIndex;
-      } else if (move === ')') {
-        // return from backtrack
+      } 
+      // Return from backtrack on closing parenthesis
+      else if (move === ')') {
         return [i, [currentLine.join(' ')]];
-      } else if (!move.includes('...')) {
-        // It's an actual move
+      } 
+      // Keep building the line
+      else if (!move.includes('...')) {
         currentLine.push(move);
       }
       i++;
@@ -31,29 +51,58 @@ export const pgnToMainlines = (pgn: string) => {
   };
 
   backtrack(0, []);
-  // mainlinesToTree(mainlines);
   return mainlines.reverse();
 };
 
-  // const mainlinesToTree = (mainlines) => {
-  //   console.log('mainlines', mainlines);
-  //   const tree = {};
-  //   for (const line of mainlines) {
-  //     // check that move does not have any numerical character in it, and is not empty
-  //     const moves = line.split(' ').filter(move => !/[0-9]/.test(move) && move !== '');
-  //     console.log('line', line);
-  //     console.log('moves', moves);
-  //     break;
-  //     let currNode = tree;
-  //     for (const move of moves) {
-  //       if (!currNode[move]) {
-  //         currNode[move] = {};
-  //       }
-  //       currNode = currNode[move];
-  //     }
-  //   }
-  //   return tree;
-  // };
+
+/**
+ * Converts an array of PGN mainlines into a tree structure of chess moves. Each node in the tree 
+ * represents a position reached after the move, with branches for different variations.
+ * 
+ * @param mainlines - Array of strings, each representing a sequence of moves in a variation. 
+ *                    Each move should be stripped of move numbers and ellipses (e.g., "e4 e5 Nf3").
+ * @returns A MoveNode representing the root of the move tree. The root is a sentinel node (empty move) 
+ *          with the actual game moves starting in its children. Each MoveNode contains:
+ */
+const mainlinesToMoveTree = (mainlines: string[]) => {
+  const sentinalNode: MoveNode = {
+    move: '',
+    moveNum: 0,
+    isWhite: false,
+    fen: '',
+    children: [],
+    parent: null,
+    numLeafChildren: 0,
+  };
+
+  for (const lineStr of mainlines) {
+    const lineArr: string[] = lineStr.split(' ').filter(move => !/[0-9]./.test(move) && move !== '');
+    let currNode: MoveNode = sentinalNode;
+    let isWhite: boolean = true;
+    let moveNum: number = 1;
+    for (const move of lineArr) {
+      // Add new node to children if it doesn't exist
+      if (!currNode.children.find(child => child.move === move)) {
+        const newNode: MoveNode = {
+          move,
+          moveNum,
+          isWhite,
+          fen: '',
+          children: [],
+          parent: currNode,
+          numLeafChildren: 0,
+        };
+        currNode.children.push(newNode);
+      }
+
+      // Move to the next node
+      currNode = currNode.children.find(child => child.move === move)!;
+      if (!isWhite) moveNum++;
+      isWhite = !isWhite;
+    }
+  }
+  return sentinalNode;
+};
 
 
 export const findNumMovesToFirstBranch = (pgn: string) => {
@@ -68,3 +117,46 @@ export const findNumMovesToFirstBranch = (pgn: string) => {
   }
   return numMoves - 1;
 };
+
+/**
+ * Creates a pretty-printed string representation of the move tree.
+ * Each move is shown with its number and color, and the tree structure is represented with indentation.
+ */
+const prettyPrintMoveTree = (node: MoveNode, verbose: boolean = false): string => {
+  return prettyPrintMoveTreeHelper(node, 0, verbose);
+};
+
+const prettyPrintMoveTreeHelper = (node: MoveNode, depth: number = 0, verbose: boolean = false): string => {
+  if (verbose) {
+    return util.inspect(node, { depth: null, colors: true });
+  }
+
+  const indent = '  '.repeat(depth);
+  const moveText = node.move ? 
+    `${node.moveNum}${node.isWhite ? '.' : '...'} ${node.move}` : 
+    'root';
+  
+  let result = `${indent}${moveText}\n`;
+  for (const child of node.children) {
+    result += prettyPrintMoveTreeHelper(child, depth + 1);
+  }
+  return result;
+};
+
+// For testing. Will only run if this file is run directly.
+if (import.meta.url === new URL(process.argv[1], 'file://').href) {
+  const pgn = `
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 
+( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 
+5. Bb3 Nf6 6. O-O *
+`
+
+  const pgn2 = `
+1. e4 
+( 1. d4 d5 2. Kd2 ) 
+1... e5 2. Nf3
+`
+  const mainlines = pgnToMainlines(pgn2);
+  const moveTree = mainlinesToMoveTree(mainlines);
+  console.log('move tree\n', prettyPrintMoveTree(moveTree, true));
+}
