@@ -5,23 +5,29 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 import { useStore } from '@nanostores/react'
 import { $isPlayingWhite, $isSkipping, setIsPlayingWhite, setIsSkipping } from '../store/chess-settings'
-import { $currentPgnObject, updateCurrentPgn, $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/chess-app'
+import { $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/chess-app'
 import { pgnToMainlines, findNumMovesToFirstBranch } from '../utils/chess/pgn-parser'
 import { cn } from '../lib/utils'
 import { NODE_ENV } from "@/env";
 import EditPgnDialog from './board-edit-dialog';
 import { PgnType } from '@/lib/types';
+import { $pgnDict } from '../store/pgn';
+import { $currentPgnId } from '../store/chess-app';
 
 const debug = NODE_ENV === "development";
 
 function ChessApp() {
+  const pgnDict = useStore($pgnDict);
+  const currentPgnId = useStore($currentPgnId);
+  const currentPgnObject = pgnDict[currentPgnId];
+  
   const [currFen, setCurrFen] = useState('');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   
   const isPlayingWhite = useStore($isPlayingWhite);
   const isSkipping = useStore($isSkipping);
   const mainlines = useStore($mainlines);
-  const currentPgnObject: PgnType | null = useStore($currentPgnObject);
+  // const currentPgnObject: PgnType | null = useStore($currentPgnObject);
   const numMovesToFirstBranch = useStore($numMovesToFirstBranch);
   
   const chessRef = useRef(new Chess());
@@ -30,31 +36,31 @@ function ChessApp() {
   const maxMoveIdxRef = useRef(-1);
   const lineIdxRef = useRef(0);
 
-  const handleTextareaChange = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newPgn = event.target.value;
-    if (!currentPgnObject) return;
+  // const handleTextareaChange = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  //   const newPgn = event.target.value;
+  //   if (!currentPgnObject) return;
 
-    // Update the PGN in both database and store
-    const success = await updateCurrentPgn(
-      currentPgnObject._id,
-      currentPgnObject.title,
-      newPgn,
-      currentPgnObject.notes
-    );
+  //   // Update the PGN in both database and store
+  //   const success = await updateCurrentPgn(
+  //     currentPgnObject._id,
+  //     currentPgnObject.title,
+  //     newPgn,
+  //     currentPgnObject.notes
+  //   );
 
-    if (success) {
-      // Reset the game with new PGN
-      // setCurrentPgn(newPgn);
-      setMainlines(pgnToMainlines(newPgn));
-      setNumMovesToFirstBranch(findNumMovesToFirstBranch(newPgn));
+  //   if (success) {
+  //     // Reset the game with new PGN
+  //     // setCurrentPgn(newPgn);
+  //     setMainlines(pgnToMainlines(newPgn));
+  //     setNumMovesToFirstBranch(findNumMovesToFirstBranch(newPgn));
       
-      // Reset game state
-      currMoveIdxRef.current = -1;
-      maxMoveIdxRef.current = -1;
-      lineIdxRef.current = 0;
-      loadNextGame();
-    }
-  };
+  //     // Reset game state
+  //     currMoveIdxRef.current = -1;
+  //     maxMoveIdxRef.current = -1;
+  //     lineIdxRef.current = 0;
+  //     loadNextGame();
+  //   }
+  // };
   
   const handleKeyDown = useCallback((event) => {
     if (event.key === 'ArrowRight' && currMoveIdxRef.current < maxMoveIdxRef.current) {
@@ -206,7 +212,7 @@ function ChessApp() {
             "flex-grow flex flex-col h-full items-center w-full gap-3 p-3 pt-0",
             debug && "border border-blue-500"
           )}>
-            <div className="flex flex-row items-center justify-between w-full">
+            <div className="flex flex-row items-center w-full gap-4 justify-left">
               <h3 className="text-2xl">{currentPgnObject?.title}</h3>
               <button onClick={() => setEditDialogOpen(true)}>
                 <i className="fa-regular fa-pen-to-square"></i>
@@ -214,13 +220,11 @@ function ChessApp() {
             </div>
             <textarea
               value={currentPgnObject?.notes || ''}
-              onChange={handleTextareaChange}
               className="w-full p-2 border border-gray-300 rounded h-fit"
               placeholder="Type here..."
             />
             <textarea 
               value={currentPgnObject?.pgn || ''}
-              onChange={handleTextareaChange}
               className="flex-grow w-full h-full p-2 border border-gray-300 rounded"
               placeholder="Type here..."
             />

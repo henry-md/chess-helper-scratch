@@ -9,7 +9,7 @@ import AddPgnDialog from "@/components/board-add-dialog";
 
 const Dashboard = () => {
   const user = useStore($user);
-  const { pgns } = useQueryPgns();
+  const { pgnArray } = useQueryPgns();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const handleNewStudy = async () => {
@@ -29,7 +29,7 @@ const Dashboard = () => {
         <h1 className="mx-auto mb-8 text-2xl font-bold text-center">My Studies</h1>
         <div className="grid grid-cols-1 gap-16 mx-auto sm:grid-cols-2 lg:grid-cols-3">
           {
-            Array.isArray(pgns) && pgns.map((pgn, index) => (
+            Array.isArray(pgnArray) && pgnArray.map((pgn, index) => (
               <BoardPreview key={index} pgn={pgn} gameTitle={pgn.title} isWhite={index % 2 === 0} />
             ))
           }

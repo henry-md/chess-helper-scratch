@@ -1,6 +1,6 @@
 import { API_URL } from "@/env";
 import { toast } from "react-toastify";
-import { addPgn, updatePgn, triggerPgnsRefresh } from "@/store/pgn";
+import { addPgnDict, updatePgnDict, deletePgnFromDict, $pgnDict } from "@/store/pgn";
 import { getAuthHeader } from "@/utils/auth";
 import logger from "@/utils/logger";
 import { formatError } from "@/utils/error";
@@ -34,8 +34,8 @@ function useMutationPgns() {
         toast.error(formatError(data));
         return undefined;
       } else {
-        addPgn(data.pgn);
-        triggerPgnsRefresh();
+        addPgnDict(data.pgn);
+        // triggerPgnsRefresh();
         return data.pgn;
       }
     } catch (error) {
@@ -64,8 +64,8 @@ function useMutationPgns() {
         body: JSON.stringify(updates),
       });
       const { pgn: updatedPgn } = await response.json();
-      updatePgn(pgnId, updatedPgn.title, updatedPgn.pgn, updatedPgn.notes);
-      triggerPgnsRefresh();
+      updatePgnDict(pgnId, updatedPgn.title, updatedPgn.pgn, updatedPgn.notes);
+      // triggerPgnsRefresh();
     } catch (error) {
       console.error(error);
       toast.error("Error updating PGN");
@@ -73,15 +73,28 @@ function useMutationPgns() {
   }
 
   const deletePgn = async (pgnId: string) => {
+    // Get current state before deletion for potential rollback
+    const currentState = $pgnDict.get();
+    
     try {
-      await fetch(`${API_URL}/pgn/${pgnId}`, { 
+      // Optimistically remove from local state
+      deletePgnFromDict(pgnId);
+
+      // Make the API call
+      const response = await fetch(`${API_URL}/pgn/${pgnId}`, { 
         method: "DELETE", 
         headers: getAuthHeader(),
       });
-      triggerPgnsRefresh();
+      
+      // Rollback state on server error
+      if (!response.ok) {
+        $pgnDict.set(currentState);
+        toast.error(`Error deleting PGN: ${response.statusText}`);
+      }
     } catch (error) {
-      console.error(error);
-      toast.error("Error deleting PGN");
+      // Rollback state on network error
+      $pgnDict.set(currentState);
+      toast.error(`Error deleting PGN: ${error}`);
     }
   }
 

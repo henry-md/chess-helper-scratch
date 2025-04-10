@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PgnType } from "@/lib/types";
 import useMutationPgns from "@/hooks/use-mutation-pgns";
-import { triggerPgnsRefresh } from "@/store/pgn";
 
 type DeletePgnDialogProps = {
   pgn: PgnType;

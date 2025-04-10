@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { PgnType } from "@/lib/types";
 import useMutationPgns from "@/hooks/use-mutation-pgns";
-import { triggerPgnsRefresh } from "@/store/pgn";
+// import { triggerPgnsRefresh } from "@/store/pgn";
 import logger from "@/utils/logger";
 
 type EditPgnDialogProps = {
@@ -44,7 +44,7 @@ const EditPgnDialog = ({ pgn, open, setEditDialogOpen }: EditPgnDialogProps) => 
       toast.error("Sorry! Title and PGN cannot be empty 😕");
     } else {
       await updatePgnContent(pgn._id, { title, pgn: pgnString, notes });
-      triggerPgnsRefresh();
+      // triggerPgnsRefresh();
       setEditDialogOpen(false);
     }
   };

@@ -16,3 +16,8 @@ Did since last meeting
 Things to ask in next meeting
 - How do you suggest I migrate backend to ts
 - Do you think I could separate the code in components/chess-app.tsx so that it's less cluttered?
+
+
+in the process of refactoring state so that I store pgns in a dictionary. Then dashboard should be responsible for turning that into a list, and I can create hooks for editing a single pgn in an O(1) operation. I should also stop having a separate state for the current pgn and just rely on the dictionary, making sure that a refresh is triggered (hopefully redeclaring the dictionary works).
+
+change it to pgn.moveText instead of pgn.pgn
