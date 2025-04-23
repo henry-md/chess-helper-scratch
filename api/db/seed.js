@@ -92,7 +92,7 @@ async function seedExistingUsers(users) {
     for (let pgn_i = 1; pgn_i <= 10; pgn_i++) {
       await Pgn.create({
         title: `Ruy Lopez ${pgn_i} by user ${user.username}`,
-        pgn: `1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 5. Bb3 Nf6 6. O-O *`,
+        moveText: `1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 5. Bb3 Nf6 6. O-O *`,
         notes: `Notes ${pgn_i}`,
         userId: user._id,
         isPublic: pgn_i == 1,

@@ -1,17 +1,23 @@
 import mongoose from "mongoose";
 
+// Define the reusable node schema
+const nodeSchema = {
+  move: String,
+  fen: String,
+};
+
 // Put pgnSchema inside userSchema to avoid an O(n) lookup
 const pgnSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
-    index: true
+    index: true,
   },
   title: {
     type: String,
     required: true,
   },
-  pgn: {
+  moveText: {
     type: String,
     required: true,
   },
@@ -24,9 +30,17 @@ const pgnSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  gameProgress: {
+    visitedBranchingNodes: [nodeSchema],
+    currentNode: nodeSchema,
+  },
+  gameSettings: {
+    isPlayingWhite: Boolean,
+    isSkipping: Boolean,
+  },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
 });
 

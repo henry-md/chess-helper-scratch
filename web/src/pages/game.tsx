@@ -4,11 +4,11 @@ import Navbar from "../components/navbar";
 import ChessApp from "../components/chess-app";
 import { useStore } from "@nanostores/react";
 import { $pgnDict } from "../store/pgn";
-import { setMainlines, setNumMovesToFirstBranch } from "../store/chess-app";
+import { setMainlines, setNumMovesToFirstBranch } from "../store/game-core";
 import { API_URL } from "@/env";
 import { getAuthHeader } from "@/utils/auth";
 import { findNumMovesToFirstBranch, pgnToMainlines } from "@/utils/chess/pgn-parser";
-import { setCurrentPgnId } from "../store/chess-app";
+import { setCurrentPgnId } from "../store/game-core";
 
 const Game = () => {
   const { id } = useParams();
@@ -27,9 +27,9 @@ const Game = () => {
       if (response.ok) {
         const { pgn } = await response.json();
         console.log('pgn', pgn);
-        console.log('pgn.pgn', pgn.pgn);
-        setMainlines(pgnToMainlines(pgn.pgn));
-        setNumMovesToFirstBranch(findNumMovesToFirstBranch(pgn.pgn));
+        console.log('pgn.moveText', pgn.moveText);
+        setMainlines(pgnToMainlines(pgn.moveText));
+        setNumMovesToFirstBranch(findNumMovesToFirstBranch(pgn.moveText));
       }
     };
 

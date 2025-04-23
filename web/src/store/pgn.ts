@@ -24,14 +24,10 @@ export const addPgnDict = (pgn: PgnType) => {
   $pgnDict.set({ ...currentPgns, [pgn._id]: pgn });
 };
 
-export const updatePgnDict = (pgnId: string, title: string, pgn: string, notes: string) => {
-  logger.info('[pgn.ts nano] Updating PGN:', pgnId, title, pgn, notes);
-  const currentPgns = $pgnDict.get();
-  if (currentPgns[pgnId]) {
-    $pgnDict.set({
-      ...currentPgns,
-      [pgnId]: { ...currentPgns[pgnId], title, pgn, notes }
-    });
+export const updatePgnDict = (pgn: PgnType) => {
+  logger.info('[pgn.ts nano] Updating PGN:', pgn._id, pgn.title, pgn.moveText, pgn.notes);
+  if ($pgnDict.get()[pgn._id]) {
+    $pgnDict.set({ ...$pgnDict.get(), [pgn._id]: pgn });
   }
 };
 

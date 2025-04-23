@@ -51,9 +51,9 @@ pgnRouter.post(
   validate(createPgnSchema),
   async (req, res) => {
     try {
-      const { title, pgn, notes, isPublic = false } = req.body;
+      const { title, moveText, notes, isPublic = false } = req.body;
       logger.debug(
-        `[pgnRouter] Creating PGN ${title} with ${pgn} and ${notes} and ${isPublic}`
+        `[pgnRouter] Creating PGN ${title} with ${moveText} and ${notes} and ${isPublic}`
       );
 
       // check if title already exists
@@ -68,9 +68,20 @@ pgnRouter.post(
       const newPgn = new Pgn({
         userId: req.user.id,
         title,
-        pgn,
+        moveText,
         notes,
         isPublic,
+        gameProgress: {
+          visitedBranchingNodes: [],
+          currentNode: {
+            move: "",
+            fen: "",
+          },
+        },
+        gameSettings: {
+          isPlayingWhite: true,
+          isSkipping: false,
+        },
       });
       await newPgn.save();
 

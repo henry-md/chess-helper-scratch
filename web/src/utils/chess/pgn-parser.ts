@@ -123,14 +123,13 @@ export const findNumMovesToFirstBranch = (pgn: string) => {
  * Each move is shown with its number and color, and the tree structure is represented with indentation.
  */
 const prettyPrintMoveTree = (node: MoveNode, verbose: boolean = false): string => {
-  return prettyPrintMoveTreeHelper(node, 0, verbose);
-};
-
-const prettyPrintMoveTreeHelper = (node: MoveNode, depth: number = 0, verbose: boolean = false): string => {
   if (verbose) {
     return util.inspect(node, { depth: null, colors: true });
   }
+  return prettyPrintMoveTreeHelper(node, 0);
+};
 
+const prettyPrintMoveTreeHelper = (node: MoveNode, depth: number = 0): string => {
   const indent = '  '.repeat(depth);
   const moveText = node.move ? 
     `${node.moveNum}${node.isWhite ? '.' : '...'} ${node.move}` : 
@@ -144,13 +143,12 @@ const prettyPrintMoveTreeHelper = (node: MoveNode, depth: number = 0, verbose: b
 };
 
 // For testing. Will only run if this file is run directly.
-if (import.meta.url === new URL(process.argv[1], 'file://').href) {
+if (typeof process !== 'undefined' && process.argv && import.meta.url === new URL(process.argv[1], 'file://').href) {
   const pgn = `
 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 
 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 
 5. Bb3 Nf6 6. O-O *
 `
-
   const pgn2 = `
 1. e4 
 ( 1. d4 d5 2. Kd2 ) 

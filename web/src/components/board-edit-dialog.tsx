@@ -24,7 +24,7 @@ type EditPgnDialogProps = {
 
 const EditPgnDialog = ({ pgn, open, setEditDialogOpen }: EditPgnDialogProps) => {
   const [title, setTitle] = useState(pgn.title);
-  const [pgnString, setPgnString] = useState(pgn.pgn);
+  const [moveText, setMoveText] = useState(pgn.moveText);
   const [notes, setNotes] = useState(pgn.notes);
   const { updatePgnContent } = useMutationPgns();
 
@@ -32,18 +32,18 @@ const EditPgnDialog = ({ pgn, open, setEditDialogOpen }: EditPgnDialogProps) => 
   useEffect(() => {
     if (!open) {
       setTitle(pgn.title);
-      setPgnString(pgn.pgn);
+      setMoveText(pgn.moveText);
       setNotes(pgn.notes);
     }
   }, [open, pgn]);
 
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    logger.debug(`[handleSave] Saving PGN ${pgn._id} with title ${title} and pgn ${pgnString} and notes ${notes}`);
+    logger.debug(`[handleSave] Saving PGN ${pgn._id} with title ${title} and pgn ${moveText} and notes ${notes}`);
     e.preventDefault();
-    if (title.length === 0 || pgnString.length === 0) {
+    if (title.length === 0 || moveText.length === 0) {
       toast.error("Sorry! Title and PGN cannot be empty 😕");
     } else {
-      await updatePgnContent(pgn._id, { title, pgn: pgnString, notes });
+      await updatePgnContent(pgn._id, { title, moveText, notes });
       // triggerPgnsRefresh();
       setEditDialogOpen(false);
     }
@@ -72,9 +72,9 @@ const EditPgnDialog = ({ pgn, open, setEditDialogOpen }: EditPgnDialogProps) => 
             </Label>
             <Input
               id="pgn"
-              value={pgnString}
+              value={moveText}
               className="col-span-3"
-              onChange={(e) => setPgnString(e.target.value)}
+              onChange={(e) => setMoveText(e.target.value)}
             />
             <Label htmlFor="notes" className="text-sm text-right">
               Notes
