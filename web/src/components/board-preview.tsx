@@ -51,8 +51,8 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
           <Chessboard
             id="BasicBoard"
             arePiecesDraggable={false}
-            position={"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}
-            boardOrientation={isWhite ? 'white' : 'black'}
+            position={pgn.gameMetadata.fenBeforeFirstBranch}
+            boardOrientation={pgn.gameSettings.isPlayingWhite ? 'white' : 'black'}
             customDarkSquareStyle={{ backgroundColor: '#769656' }}
             customLightSquareStyle={{ backgroundColor: '#eeeed2' }}
             customBoardStyle={{

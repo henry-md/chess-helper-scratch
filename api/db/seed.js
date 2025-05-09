@@ -91,11 +91,30 @@ async function seedExistingUsers(users) {
     // Create 10 PGNs per user
     for (let pgn_i = 1; pgn_i <= 10; pgn_i++) {
       await Pgn.create({
+        userId: user._id,
         title: `Ruy Lopez ${pgn_i} by user ${user.username}`,
         moveText: `1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 5. Bb3 Nf6 6. O-O *`,
         notes: `Notes ${pgn_i}`,
-        userId: user._id,
         isPublic: pgn_i == 1,
+        gameProgress: {
+          visitedBranchingNodes: [],
+          currentNode: {
+            move: "",
+            moveNum: 0,
+            isWhite: false,
+            fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq h6 0 1",
+            numLeafChildren: 0,
+            children: [],
+            parent: null,
+          },
+        },
+        gameSettings: {
+          isPlayingWhite: pgn_i % 2 == 0,
+          isSkipping: false,
+        },
+        gameMetadata: {
+          fenBeforeFirstBranch: "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+        },
       });
     }
   }

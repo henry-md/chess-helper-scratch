@@ -1,10 +1,22 @@
 import mongoose from "mongoose";
 
 // Define the reusable node schema
-const nodeSchema = {
+const nodeSchema = new mongoose.Schema({
   move: String,
+  moveNum: Number,
+  isWhite: Boolean,
   fen: String,
-};
+  numLeafChildren: Number,
+});
+
+// Add recursive references after initial definition
+nodeSchema.add({
+  children: [nodeSchema],
+  parent: {
+    type: nodeSchema,
+    default: null,
+  },
+});
 
 // Put pgnSchema inside userSchema to avoid an O(n) lookup
 const pgnSchema = new mongoose.Schema({
@@ -37,6 +49,9 @@ const pgnSchema = new mongoose.Schema({
   gameSettings: {
     isPlayingWhite: Boolean,
     isSkipping: Boolean,
+  },
+  gameMetadata: {
+    fenBeforeFirstBranch: String,
   },
   createdAt: {
     type: Date,

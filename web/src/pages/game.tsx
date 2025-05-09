@@ -7,7 +7,7 @@ import { $pgnDict } from "../store/pgn";
 import { setMainlines, setNumMovesToFirstBranch } from "../store/game-core";
 import { API_URL } from "@/env";
 import { getAuthHeader } from "@/utils/auth";
-import { findNumMovesToFirstBranch, pgnToMainlines } from "@/utils/chess/pgn-parser";
+import { findNumMovesToFirstBranch, moveTextToMainlines } from "@/utils/chess/pgn-parser";
 import { setCurrentPgnId } from "../store/game-core";
 
 const Game = () => {
@@ -28,7 +28,7 @@ const Game = () => {
         const { pgn } = await response.json();
         console.log('pgn', pgn);
         console.log('pgn.moveText', pgn.moveText);
-        setMainlines(pgnToMainlines(pgn.moveText));
+        setMainlines(moveTextToMainlines(pgn.moveText));
         setNumMovesToFirstBranch(findNumMovesToFirstBranch(pgn.moveText));
       }
     };

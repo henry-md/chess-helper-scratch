@@ -1,4 +1,5 @@
 import util from 'util';
+import { Chess } from 'chess.js';
 
 interface MoveNode {
   move: string;
@@ -11,9 +12,9 @@ interface MoveNode {
 }
 
 // Turns a nested pgn into a set of mainline pgns.
-export const pgnToMainlines = (pgn: string) => {
+export const moveTextToMainlines = (moveText: string) => {
   const mainlines: string[] = [];
-  const tokens = pgn.split(/\s+/).filter(token => token.trim() !== '');
+  const tokens = moveText.split(/\s+/).filter(token => token.trim() !== '');
   
   /**
    * Recursively processes PGN tokens to extract mainlines, handling variations (parentheses).
@@ -80,14 +81,20 @@ const mainlinesToMoveTree = (mainlines: string[]) => {
     let currNode: MoveNode = sentinalNode;
     let isWhite: boolean = true;
     let moveNum: number = 1;
+    
+    // Create a new chess instance for this line
+    const chess = new Chess();
+
     for (const move of lineArr) {
+      chess.move(move);
+
       // Add new node to children if it doesn't exist
       if (!currNode.children.find(child => child.move === move)) {
         const newNode: MoveNode = {
           move,
           moveNum,
           isWhite,
-          fen: '',
+          fen: chess.fen(), // Store the FEN after making the move
           children: [],
           parent: currNode,
           numLeafChildren: 0,
@@ -100,6 +107,9 @@ const mainlinesToMoveTree = (mainlines: string[]) => {
       if (!isWhite) moveNum++;
       isWhite = !isWhite;
     }
+    
+    // Reset chess instance for next line
+    chess.reset();
   }
   return sentinalNode;
 };
@@ -125,7 +135,7 @@ export const findNumMovesToFirstBranch = (pgn: string) => {
 const prettyPrintMoveTree = (node: MoveNode, verbose: boolean = false): string => {
   if (verbose) {
     return util.inspect(node, { depth: null, colors: true });
-  }
+  } else 
   return prettyPrintMoveTreeHelper(node, 0);
 };
 
@@ -144,17 +154,17 @@ const prettyPrintMoveTreeHelper = (node: MoveNode, depth: number = 0): string =>
 
 // For testing. Will only run if this file is run directly.
 if (typeof process !== 'undefined' && process.argv && import.meta.url === new URL(process.argv[1], 'file://').href) {
-  const pgn = `
+  const moveText = `
 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 
 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 
 5. Bb3 Nf6 6. O-O *
 `
-  const pgn2 = `
+  const moveText2 = `
 1. e4 
 ( 1. d4 d5 2. Kd2 ) 
 1... e5 2. Nf3
 `
-  const mainlines = pgnToMainlines(pgn2);
+  const mainlines = moveTextToMainlines(moveText2);
   const moveTree = mainlinesToMoveTree(mainlines);
   console.log('move tree\n', prettyPrintMoveTree(moveTree, true));
 }

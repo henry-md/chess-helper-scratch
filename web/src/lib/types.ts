@@ -6,11 +6,14 @@ export type UserType = {
   createdAt: string; // ISO
 }
 
-export type PgnBodyType = {
-  title: string;
-  moveText: string;
-  notes: string;
-  isPublic: boolean;
+export type NodeType = {
+  move: string;
+  moveNum: number;
+  isWhite: boolean;
+  fen: string;
+  numLeafChildren: number;
+  children: NodeType[];
+  parent: NodeType | null;
 }
 
 export type PgnType = {
@@ -18,6 +21,18 @@ export type PgnType = {
   title: string;
   moveText: string;
   notes: string;
+  isPublic: boolean;
+  gameProgress: {
+    visitedBranchingNodes: NodeType[];
+    currentNode: NodeType;
+  };
+  gameSettings: {
+    isPlayingWhite: boolean;
+    isSkipping: boolean;
+  };
+  gameMetadata: {
+    fenBeforeFirstBranch: string;
+  };
   userId: string;
   createdAt: Date;
 }
