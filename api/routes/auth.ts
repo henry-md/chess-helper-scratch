@@ -1,10 +1,20 @@
-import { User } from "../models/User";
+import { IUser, User } from "../models/User";
 import { hash, verify } from "@node-rs/argon2";
-import { Router } from "express";
+import { Router, Request, Response, RequestHandler } from "express";
 import { generateToken, verifyToken } from "../utils/jwt";
 import logger from "../utils/logger";
 
-const authRouter = Router();
+const router = Router();
+
+/* Notes
+- I typecast async functionas as RequestHandlers both to specify the req object in sign-up and to be able to return non-null values. I want to return for ts type checking, so I don't have to check for null values (ex. user?.username -> user.username)
+*/
+
+interface SignUpBody {
+  email: string;
+  username: string;
+  password: string;
+}
 
 const hashOptions = {
   memoryCost: 19456,
@@ -13,7 +23,7 @@ const hashOptions = {
   parallelism: 1,
 };
 
-authRouter.post("/sign-up", async (req, res) => {
+router.post("/sign-up", (async (req: Request<{}, {}, SignUpBody>, res: Response) => {
   try {
     const { email, username, password } = req.body;
     logger.debug(`[Sign Up] Attempting to create user with email: ${email}`);
@@ -24,10 +34,10 @@ authRouter.post("/sign-up", async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       logger.warn(`[Sign Up] User already exists with email: ${email}`);
-      return res.json({ message: "User already exists" });
+      res.json({ message: "User already exists" });
     }
 
-    const user = await User.create({
+    const user: IUser = await User.create({
       email,
       username,
       passwordHash,
@@ -46,14 +56,14 @@ authRouter.post("/sign-up", async (req, res) => {
     });
   } catch (error) {
     logger.error("[Sign Up] Error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
-});
+}) as RequestHandler);
 
-authRouter.post("/sign-in", async (req, res) => {
+router.post("/sign-in", (async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     logger.debug(`[Sign In] Attempting to sign in with email: ${email}`);
@@ -66,7 +76,13 @@ authRouter.post("/sign-in", async (req, res) => {
         message: "Incorrect email or password",
       });
     }
-    logger.debug(`[Sign In] User found: ${user.username}`);
+    if (!user.username || !user.passwordHash) {
+      return res.status(401).json({
+        success: false,
+        message: "Error retrieving user information",
+      });
+    }
+    logger.debug(`[Sign In] User found w/ username: ${user.username}`);
 
     logger.debug("[Sign In] Starting password verification...");
     logger.debug(
@@ -95,7 +111,7 @@ authRouter.post("/sign-in", async (req, res) => {
     logger.debug("[Sign In] JWT token generated");
 
     logger.info(`[Sign In] User ${user._id} signed in successfully`);
-    return res.json({
+    res.json({
       success: true,
       message: "User signed in successfully",
       user,
@@ -103,24 +119,24 @@ authRouter.post("/sign-in", async (req, res) => {
     });
   } catch (error) {
     logger.error("[Sign In] Error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
-});
+}) as RequestHandler);
 
-authRouter.post("/sign-out", async (req, res) => {
+router.post("/sign-out", async (req: Request, res: Response) => {
   // With JWT, we don't need to do anything on the server side
   // The client should remove the token
   logger.info("[Sign Out] User signed out");
-  return res.json({
+  res.json({
     success: true,
     message: "Signed out successfully",
   });
 });
 
-authRouter.get("/validate-token", async (req, res) => {
+router.get("/validate-token", async (req: Request, res: Response) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   logger.debug(
     `[Validate Token] Received token: ${token ? "Present" : "Missing"}`
@@ -128,19 +144,20 @@ authRouter.get("/validate-token", async (req, res) => {
 
   if (!token) {
     logger.warn("[Validate Token] No token provided");
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       message: "No token provided",
     });
   }
 
-  const decoded = verifyToken(token);
+  const decoded = verifyToken(token as string);
   if (!decoded) {
     logger.warn("[Validate Token] Invalid token");
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       message: "Invalid token",
     });
+    return;
   }
   logger.debug(
     `[Validate Token] Token decoded successfully: ${JSON.stringify(decoded)}`
@@ -149,21 +166,22 @@ authRouter.get("/validate-token", async (req, res) => {
   const user = await User.findById(decoded.userId);
   if (!user) {
     logger.warn("[Validate Token] User not found for decoded token");
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       message: "User not found",
     });
+    return;
   }
   logger.debug(`[Validate Token] User found: ${user.username}`);
 
-  return res.json({
+  res.json({
     success: true,
     message: "Token is valid",
     user,
   });
 });
 
-authRouter.get("/users", async (req, res) => {
+router.get("/users", async (req: Request, res: Response) => {
   try {
     const users = await User.find();
     logger.debug(`[Users] Retrieved ${users.length} users`);
@@ -174,4 +192,4 @@ authRouter.get("/users", async (req, res) => {
   }
 });
 
-export default authRouter;
+export default router;

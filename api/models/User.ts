@@ -1,5 +1,12 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 
+interface IUser extends Document {
+  _id: string;
+  email: string;
+  username: string;
+  passwordHash: string;
+  createdAt: Date;
+}
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -21,15 +28,11 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Handles User.deleteOne() and User.findOneAndDelete()
-userSchema.pre('deleteOne', async function() {
+// Before deleting a user, delete all their Pgns (remove hook is deprecated)
+userSchema.pre("deleteOne", async function () {
   const userId = this.getQuery()._id;
-  await mongoose.model('Pgn').deleteMany({ userId });
+  await mongoose.model("Pgn").deleteMany({ userId });
 });
 
-// Handles document.remove() on a single user instance
-userSchema.pre('remove', async function() {
-  await mongoose.model('Pgn').deleteMany({ userId: this._id });
-});
-
-export const User = mongoose.model("User", userSchema);
+export const User = mongoose.model<IUser>("User", userSchema);
+export type { IUser };
