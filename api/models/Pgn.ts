@@ -1,5 +1,25 @@
 import mongoose from "mongoose";
 
+interface IPgn extends Document {
+  userId: string;
+  title: string;
+  moveText: string;
+  notes: string;
+  isPublic: boolean;
+  gameProgress: {
+    visitedNodeHashes: string[];
+    currentNodeHash: string;
+  };
+  gameSettings: {
+    isPlayingWhite: boolean;
+    isSkipping: boolean;
+  };
+  gameMetadata: {
+    fenBeforeFirstBranch: string;
+  };
+  createdAt: Date;
+}
+
 // Define the reusable node schema
 const nodeSchema = new mongoose.Schema({
   move: String,
@@ -43,8 +63,8 @@ const pgnSchema = new mongoose.Schema({
     default: false,
   },
   gameProgress: {
-    visitedBranchingNodes: [nodeSchema],
-    currentNode: nodeSchema,
+    visitedNodeHashes: [String],
+    currentNodeHash: String,
   },
   gameSettings: {
     isPlayingWhite: Boolean,
@@ -59,4 +79,5 @@ const pgnSchema = new mongoose.Schema({
   },
 });
 
-export const Pgn = mongoose.model("Pgn", pgnSchema);
+export const Pgn = mongoose.model<IPgn>("Pgn", pgnSchema);
+export type { IPgn };

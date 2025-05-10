@@ -1,5 +1,5 @@
 import { verifyToken } from "../utils/jwt";
-import { User } from "../models/User";
+import { IUser, User } from "../models/User";
 import logger from "../utils/logger";
 import { Request, Response, NextFunction } from 'express';
 
@@ -21,17 +21,13 @@ export const auth = async (
     return next();
   }
 
-  const user = await User.findById(decoded.userId);
+  const user: IUser | null = await User.findById(decoded.userId);
   if (!user) {
     req.user = undefined;
     return next();
   }
 
   logger.debug(`[Auth]: User ${user.username} authenticated`);
-  req.user = {
-    id: user._id,
-    username: user.username,
-    email: user.email,
-  };
+  req.user = user.toObject() as IUser;
   return next();
 };

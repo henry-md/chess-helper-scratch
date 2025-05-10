@@ -1,8 +1,7 @@
 import logger from "../utils/logger";
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 
-
-export const authGuard = async (
+export const authGuard = (async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -15,6 +14,6 @@ export const authGuard = async (
     });
   }
 
-  logger.debug(`[AuthGuard]: User ${req.user.username} authenticated`);
+  logger.debug(`[AuthGuard]: User ${JSON.stringify(req.user)}`);
   return next();
-};
+}) as RequestHandler;

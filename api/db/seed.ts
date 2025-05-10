@@ -5,11 +5,12 @@ import { hash } from "@node-rs/argon2";
 import dotenv from "dotenv";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { IUser } from "../models/User.js";
 
-// Get the directory path for the current module
+// Import environment variables
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// Load .env from the root directory
 dotenv.config({ path: join(__dirname, "../.env") });
+// dotenv.config();
 
 const { MONGO_URL } = process.env;
 
@@ -32,7 +33,7 @@ async function connectDB() {
   }
 
   try {
-    await mongoose.connect(MONGO_URL, {
+    await mongoose.connect(MONGO_URL as string, {
       dbName: "chess-helper",
     });
     console.log("MongoDB is connected successfully");
@@ -56,25 +57,25 @@ async function deleteAllTables() {
 async function deleteAllTablesAndStructure() {
   await connectDB();
   try {
-    await mongoose.connection.db.dropCollection("users");
-    await mongoose.connection.db.dropCollection("sessions");
-    await mongoose.connection.db.dropCollection("pgns");
+    await mongoose.connection.db?.dropCollection("users");
+    await mongoose.connection.db?.dropCollection("sessions");
+    await mongoose.connection.db?.dropCollection("pgns");
     console.log("All tables deleted successfully");
   } catch (err) {
     console.error("Error deleting tables:", err);
   }
 }
 
-async function createNewUsers(numUsers) {
+async function createNewUsers(numUsers: number): Promise<IUser[]> {
   await connectDB();
 
-  const users = [];
+  const users: IUser[] = [];
   for (let user_i = 1; user_i <= numUsers; user_i++) {
     const email = `user${user_i}@gmail.com`;
     const username = `user${user_i}`;
     const passwordHash = await hash(`asdf`, hashOptions);
 
-    const user = await User.create({
+    const user: IUser = await User.create({
       email,
       username,
       passwordHash,
@@ -84,7 +85,7 @@ async function createNewUsers(numUsers) {
   return users;
 }
 
-async function seedExistingUsers(users) {
+async function seedExistingUsers(users: IUser[]): Promise<void> {
   await connectDB();
 
   for (const user of users) {

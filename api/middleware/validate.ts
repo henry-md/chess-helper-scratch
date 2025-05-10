@@ -1,10 +1,10 @@
 import logger from "../utils/logger";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import { Schema } from "joi";
 
 // Custom middleware to throw error in specific format w/ message, error, success.
 export const validate = (schema: Schema, property = "body") => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return ((req: Request, res: Response, next: NextFunction) => {
     const { error } = schema.validate(req[property as keyof Request], { abortEarly: false });
 
     if (!error) {
@@ -19,5 +19,5 @@ export const validate = (schema: Schema, property = "body") => {
       errors,
       success: false,
     });
-  };
+  }) as RequestHandler;
 };

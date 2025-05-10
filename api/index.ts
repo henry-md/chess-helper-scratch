@@ -12,7 +12,7 @@ const app = express();
 const { MONGO_URL, PORT } = process.env;
 
 mongoose
-  .connect(MONGO_URL, {
+  .connect(MONGO_URL as string, {
     dbName: "chess-helper",
   })
   .then(() => console.log("MongoDB is  connected successfully"))

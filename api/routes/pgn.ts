@@ -8,7 +8,8 @@ import {
   updatePgnSchema,
   pgnIdSchema,
 } from "../validators/pgn.validator";
-
+import { RequestHandler } from "express";
+import { getFenBeforeFirstBranch } from "../utils/pgn-parser";
 const pgnRouter = Router();
 
 pgnRouter.get("/test-pgn", async (req, res) => {
@@ -19,28 +20,28 @@ pgnRouter.get(
   "/pgn/:id",
   authGuard,
   validate(pgnIdSchema, "params"),
-  async (req, res) => {
+  (async (req, res) => {
     const { id } = req.params;
     const pgn = await Pgn.findById(id);
     if (!pgn) {
       return res.status(404).json({ message: "PGN not found", success: false });
-    } else if (pgn.userId !== String(req.user.id)) {
+    } else if (pgn.userId !== String(req.user?._id)) {
       return res.status(403).json({
         message: "You are not authorized to access this PGN",
         success: false,
       });
     }
     res.status(200).json({ pgn, success: true });
-  }
+  }) as RequestHandler
 );
 
 pgnRouter.get("/pgns", authGuard, async (req, res) => {
   try {
-    const pgns = await Pgn.find({ userId: req.user.id });
-    logger.debug(`Found ${pgns.length} PGNs for user ${req.user.username}`);
+    const pgns = await Pgn.find({ userId: req.user?._id });
+    logger.debug(`Found ${pgns.length} PGNs for user ${req.user?.username || "Unknown"}`);
     res.status(200).json({ pgns, success: true });
   } catch (error) {
-    logger.error(`Error fetching PGNs for user ${req.user.username}: ${error}`);
+    logger.error(`Error fetching PGNs for user ${req.user?.username || "Unknown"}: ${error}`);
     res.status(500).json({ message: "Error fetching PGNs", success: false });
   }
 });
@@ -49,7 +50,7 @@ pgnRouter.post(
   "/pgn",
   authGuard,
   validate(createPgnSchema),
-  async (req, res) => {
+  (async (req, res) => {
     try {
       const { title, moveText, notes, isPublic = false } = req.body;
       logger.debug(
@@ -57,16 +58,19 @@ pgnRouter.post(
       );
 
       // check if title already exists
-      const existingPgns = await Pgn.find({ userId: req.user.id });
+      const existingPgns = await Pgn.find({ userId: req.user?._id });
       if (existingPgns.some((pgn) => pgn.title === title)) {
         return res
           .status(400)
           .json({ message: "Title already exists", success: false });
       }
 
+      // Get FEN before first branch
+      const fenBeforeFirstBranch = getFenBeforeFirstBranch(moveText);
+
       // Add PGN to database
       const newPgn = new Pgn({
-        userId: req.user.id,
+        userId: req.user?._id,
         title,
         moveText,
         notes,
@@ -83,7 +87,7 @@ pgnRouter.post(
           isSkipping: false,
         },
         gameMetadata: {
-          fenBeforeFirstBranch: "",
+          fenBeforeFirstBranch,
         },
       });
       await newPgn.save();
@@ -99,7 +103,7 @@ pgnRouter.post(
       logger.error(`Error adding PGN: ${error}`);
       res.status(500).json({ message: "Error adding PGN", success: false });
     }
-  }
+  }) as RequestHandler
 );
 
 pgnRouter.patch(
@@ -107,7 +111,7 @@ pgnRouter.patch(
   authGuard,
   validate(pgnIdSchema, "params"),
   validate(updatePgnSchema),
-  async (req, res) => {
+  (async (req, res) => {
     logger.debug(
       `[pgnRouter] Patching PGN ${req.params.id} with ${JSON.stringify(
         req.body
@@ -122,7 +126,7 @@ pgnRouter.patch(
         return res
           .status(404)
           .json({ message: "PGN not found", success: false });
-      } else if (pgn.userId !== String(req.user.id)) {
+      } else if (pgn.userId !== String(req.user?._id)) {
         return res.status(403).json({
           message: "You are not authorized to update this PGN",
           success: false,
@@ -141,14 +145,14 @@ pgnRouter.patch(
     } catch (error) {
       res.status(500).json({ message: "Error updating PGN", success: false });
     }
-  }
+  }) as RequestHandler
 );
 
 pgnRouter.delete(
   "/pgn/:id",
   authGuard,
   validate(pgnIdSchema, "params"),
-  async (req, res) => {
+  (async (req, res) => {
     try {
       const { id } = req.params;
       const pgn = await Pgn.findByIdAndDelete(id);
@@ -158,7 +162,7 @@ pgnRouter.delete(
     } catch (error) {
       res.status(500).json({ message: "Error deleting PGN", success: false });
     }
-  }
+  }) as RequestHandler
 );
 
 export default pgnRouter;
