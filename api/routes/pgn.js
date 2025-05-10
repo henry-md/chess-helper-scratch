@@ -82,6 +82,9 @@ pgnRouter.post(
           isPlayingWhite: true,
           isSkipping: false,
         },
+        gameMetadata: {
+          fenBeforeFirstBranch: "",
+        },
       });
       await newPgn.save();
 

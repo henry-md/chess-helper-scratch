@@ -25,6 +25,13 @@ Todo laterr
 
 =-------------------------=
 
+Implementation ideas
+- For implementing use-game & save state:
+  - create globally available hashNode = (node: NodeType) that is pgn + '||' + moveText. 
+  - store visitedNodeHashes in pgn
+
+=-------------------------=
+
 Future ideas
 - Allow folders to group pgn's
 
