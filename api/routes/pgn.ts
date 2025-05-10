@@ -1,13 +1,13 @@
-import { Pgn } from "../models/Pgn.js";
-import { authGuard } from "../middleware/auth-guard.js";
+import { Pgn } from "../models/Pgn";
+import { authGuard } from "../middleware/auth-guard";
 import { Router } from "express";
-import logger from "../utils/logger.js";
-import { validate } from "../middleware/validate.js";
+import logger from "../utils/logger";
+import { validate } from "../middleware/validate";
 import {
   createPgnSchema,
   updatePgnSchema,
   pgnIdSchema,
-} from "../validators/pgn.validator.js";
+} from "../validators/pgn.validator";
 
 const pgnRouter = Router();
 

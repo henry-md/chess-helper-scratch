@@ -1,4 +1,4 @@
-import logger from "../utils/logger.js";
+import logger from "../utils/logger";
 
 // Custom middleware to throw error in specific format w/ message, error, success.
 export const validate = (schema, property = "body") => {

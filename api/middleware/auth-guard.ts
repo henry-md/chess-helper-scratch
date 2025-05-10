@@ -1,4 +1,4 @@
-import logger from "../utils/logger.js";
+import logger from "../utils/logger";
 
 export const authGuard = async (req, res, next) => {
   if (!req.user) {

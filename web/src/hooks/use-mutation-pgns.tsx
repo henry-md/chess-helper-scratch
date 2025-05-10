@@ -9,26 +9,27 @@ import { PgnType } from "@/lib/types";
 function useMutationPgns() {
   const createPgn = async ({
     title,
-    pgn,
+    moveText,
     notes = "",
     isPublic = false 
   }: {
     title: string;
-    pgn: string;
+    moveText: string;
     notes?: string;
     isPublic?: boolean;
   }) => {
     try {
+      console.log('trying to create pgn');
       const response = await fetch(`${API_URL}/pgn`, {
         method: "POST",
         headers: {
           ...getAuthHeader(),
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ title, pgn, notes, isPublic }),
+        body: JSON.stringify({ title, moveText, notes, isPublic }),
       });
       
-      logger.debug(`[useMutationPgns] Creating PGN "${title}" with pgn "${pgn}" and notes "${notes}" and isPublic "${isPublic}"; response: ${JSON.stringify(response)}`);
+      logger.debug(`[useMutationPgns] Creating PGN "${title}" with move text "${moveText}" and notes "${notes}" and isPublic "${isPublic}"; response: ${JSON.stringify(response)}`);
       const data = await response.json();
       
       if (!response.ok) {
@@ -40,6 +41,7 @@ function useMutationPgns() {
         return data.pgn;
       }
     } catch (error) {
+      console.error('reached error');
       toast.error("Error adding PGN");
       return undefined;
     }

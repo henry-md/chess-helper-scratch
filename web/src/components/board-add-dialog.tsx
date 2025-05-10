@@ -23,7 +23,7 @@ type AddPgnDialogProps = {
 
 const AddPgnDialog = ({ open, setAddDialogOpen }: AddPgnDialogProps) => {
   const [title, setTitle] = useState("");
-  const [pgnString, setPgnString] = useState("");
+  const [moveText, setMoveText] = useState("");
   const [notes, setNotes] = useState("");
   const { createPgn } = useMutationPgns();
 
@@ -31,17 +31,17 @@ const AddPgnDialog = ({ open, setAddDialogOpen }: AddPgnDialogProps) => {
   useEffect(() => {
     if (!open) {
       setTitle("");
-      setPgnString("");
+      setMoveText("");
       setNotes("");
     }
   }, [open]);
 
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (title.length === 0 || pgnString.length === 0) {
+    if (title.length === 0 || moveText.length === 0) {
       toast.error("Sorry! Title and PGN cannot be empty 😕");
     } else {
-      await createPgn({ title, pgn: pgnString, notes });
+      await createPgn({ title, moveText, notes });
       // triggerPgnsRefresh();
       setAddDialogOpen(false);
     }
@@ -70,9 +70,9 @@ const AddPgnDialog = ({ open, setAddDialogOpen }: AddPgnDialogProps) => {
             </Label>
             <Input
               id="pgn"
-              value={pgnString}
+              value={moveText}
               className="col-span-3"
-              onChange={(e) => setPgnString(e.target.value)}
+              onChange={(e) => setMoveText(e.target.value)}
             />
             <Label htmlFor="notes" className="text-sm text-right">
               Notes

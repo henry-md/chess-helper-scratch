@@ -1,20 +1,17 @@
-Key
+# Key
 - "lastBranchingNode": the node which essentially represents the current line we're quizzing the user on. It's the first node to lead to only a single leaf node, and it's the last branching node along that line. It's the node that should be stored in our progress, to make sure we don't visit again.
 
-=-------------------------=
-
-Bugs
+# Bugs
 - types are a bit off — use pgnBody inside pgn, and idk why pgn doesn't have isPublic attribute.
-=-------------------------=
 
-Todo next
+# Todo next
 - Chess-app
   - create
 
-Todo later
+# Todo later
 - Add the http request that happens in <Game> to a hook.
 
-Todo laterr
+# Todo laterr
 - maybe set up auto reformatting on save (look more into eslint)
 - set up best practice documentation for ai models to use to give better edits
 - migrate frontend to ts
@@ -23,25 +20,19 @@ Todo laterr
 - Can format the pgn text like Chess.com
   - Can allow clicking & navigating through that pgn text like chess.com. Can make separate explore tab.
 
-=-------------------------=
-
-Implementation ideas
+# Implementation ideas
 - For implementing use-game & save state:
   - create globally available hashNode = (node: NodeType) that is pgn + '||' + moveText. 
   - store visitedNodeHashes in pgn
 
-=-------------------------=
-
-Future ideas
+# Future ideas
 - Allow folders to group pgn's
 
-=-------------------------=
-
-Design decision justification
+# Design decision justification
 
 - Whether to implement game progress destructively: no
   - I think implementing a clickable interface like Chess.com would be way simpler if I didn't distinguish between previously played moves and current ones. Saving progress should still be pretty straight forward — it's just a question of whether to delete lastBranchingNode from its parent, or to add it to a set to make sure not to visit it again.
 
-=-------------------------=
-
-write entry on website: Full stack application (MERN) with user sign in, token-based authentication, 
+# Things I've done since last meeting
+- migrated backend to ts
+- migrated isPlayingWhite & thumbnail to backend from frontend, attached to each pgn object

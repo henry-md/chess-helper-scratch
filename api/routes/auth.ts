@@ -1,8 +1,8 @@
-import { User } from "../models/User.js";
+import { User } from "../models/User";
 import { hash, verify } from "@node-rs/argon2";
 import { Router } from "express";
-import { generateToken, verifyToken } from "../utils/jwt.js";
-import logger from "../utils/logger.js";
+import { generateToken, verifyToken } from "../utils/jwt";
+import logger from "../utils/logger";
 
 const authRouter = Router();
 

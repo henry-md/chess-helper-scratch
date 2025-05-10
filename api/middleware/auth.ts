@@ -1,6 +1,6 @@
-import { verifyToken } from "../utils/jwt.js";
-import { User } from "../models/User.js";
-import logger from "../utils/logger.js";
+import { verifyToken } from "../utils/jwt";
+import { User } from "../models/User";
+import logger from "../utils/logger";
 
 export const auth = async (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
