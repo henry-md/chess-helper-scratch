@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 
-interface IPgn extends Document {
+export interface IPgn {
   userId: string;
   title: string;
   moveText: string;
@@ -8,7 +8,6 @@ interface IPgn extends Document {
   isPublic: boolean;
   gameProgress: {
     visitedNodeHashes: string[];
-    currentNodeHash: string;
   };
   gameSettings: {
     isPlayingWhite: boolean;
@@ -17,26 +16,13 @@ interface IPgn extends Document {
   gameMetadata: {
     fenBeforeFirstBranch: string;
   };
-  createdAt: Date;
 }
 
-// Define the reusable node schema
-const nodeSchema = new mongoose.Schema({
-  move: String,
-  moveNum: Number,
-  isWhite: Boolean,
-  fen: String,
-  numLeafChildren: Number,
-});
-
-// Add recursive references after initial definition
-nodeSchema.add({
-  children: [nodeSchema],
-  parent: {
-    type: nodeSchema,
-    default: null,
-  },
-});
+// Document adds properties like _id, createdAt, etc.
+export interface IPgnDocument extends IPgn, Document {
+  _id: Types.ObjectId;
+  createdAt: Date;
+}
 
 // Put pgnSchema inside userSchema to avoid an O(n) lookup
 const pgnSchema = new mongoose.Schema({
@@ -79,5 +65,4 @@ const pgnSchema = new mongoose.Schema({
   },
 });
 
-export const Pgn = mongoose.model<IPgn>("Pgn", pgnSchema);
-export type { IPgn };
+export const Pgn = mongoose.model<IPgnDocument>("Pgn", pgnSchema);

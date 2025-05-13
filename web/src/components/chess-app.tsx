@@ -6,7 +6,7 @@ import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 import { useStore } from '@nanostores/react'
 import { $isPlayingWhite, $isSkipping, setIsPlayingWhite, setIsSkipping } from '../store/chess-settings'
 import { $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/game-core'
-import { moveTextToMainlines, findNumMovesToFirstBranch } from '../utils/chess/pgn-parser'
+import { moveTextToMainlines, findNumMovesToFirstBranch } from '@chess-helper/shared'
 import { cn } from '../lib/utils'
 import { NODE_ENV } from "@/env";
 import EditPgnDialog from './board-edit-dialog';

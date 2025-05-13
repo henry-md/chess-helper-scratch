@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
-import { User } from "../models/User.js";
+import { IUser, User } from "../models/User.js";
 import { Pgn } from "../models/Pgn.js";
 import { hash } from "@node-rs/argon2";
 import dotenv from "dotenv";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { IUser } from "../models/User.js";
+import { IUserDocument } from "../models/User.js";
+import { IPgn, IPgnDocument } from "../models/Pgn.js";
 
 // Import environment variables
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -66,48 +67,40 @@ async function deleteAllTablesAndStructure() {
   }
 }
 
-async function createNewUsers(numUsers: number): Promise<IUser[]> {
+async function createNewUsers(numUsers: number): Promise<IUserDocument[]> {
   await connectDB();
 
-  const users: IUser[] = [];
+  const userDocuments: IUserDocument[] = [];
   for (let user_i = 1; user_i <= numUsers; user_i++) {
     const email = `user${user_i}@gmail.com`;
     const username = `user${user_i}`;
-    const passwordHash = await hash(`asdf`, hashOptions);
+    const passwordHash = await hash(`1fe232a8433436d4206206cd4a843cbd710973ffa0c29ebd2eb1bc3c4fb10aa4c788caa02777f9fbb29873498ee0a89308c56cc02860c2e47c6d4f35adab11cf`, hashOptions);
 
-    const user: IUser = await User.create({
+    const user: IUser = {
       email,
       username,
-      passwordHash,
-    });
-    users.push(user);
+      passwordHash
+    }
+    const userDocument: IUserDocument = await User.create(user);
+    userDocuments.push(userDocument);
   }
-  return users;
+  return userDocuments;
 }
 
-async function seedExistingUsers(users: IUser[]): Promise<void> {
+async function seedExistingUsers(users: IUserDocument[]): Promise<void> {
   await connectDB();
 
   for (const user of users) {
     // Create 10 PGNs per user
     for (let pgn_i = 1; pgn_i <= 10; pgn_i++) {
-      await Pgn.create({
-        userId: user._id,
+      const pgn: IPgn = {
+        userId: user._id.toString(),
         title: `Ruy Lopez ${pgn_i} by user ${user.username}`,
         moveText: `1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 5. Bb3 Nf6 6. O-O *`,
         notes: `Notes ${pgn_i}`,
         isPublic: pgn_i == 1,
         gameProgress: {
-          visitedBranchingNodes: [],
-          currentNode: {
-            move: "",
-            moveNum: 0,
-            isWhite: false,
-            fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq h6 0 1",
-            numLeafChildren: 0,
-            children: [],
-            parent: null,
-          },
+          visitedNodeHashes: [],
         },
         gameSettings: {
           isPlayingWhite: pgn_i % 2 == 0,
@@ -116,7 +109,8 @@ async function seedExistingUsers(users: IUser[]): Promise<void> {
         gameMetadata: {
           fenBeforeFirstBranch: "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4",
         },
-      });
+      };
+      await Pgn.create(pgn);
     }
   }
 }

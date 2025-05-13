@@ -4,12 +4,8 @@ import { $currentPgnId, $currentLine, $currentLineIdx, setCurrentLineIdx } from 
 import { useEffect, useState, useCallback } from "react";
 import { NodeType, PgnType } from "@/lib/types";
 
-function useGame() {
-  // Current PGN Object
-  const pgnDict: Record<string, PgnType> = useStore($pgnDict);
-  const currentPgnId: string = useStore($currentPgnId);
-  const currentPgn: PgnType = pgnDict[currentPgnId];
-  // const currentNode: NodeType = currentPgn.gameProgress.currentNode;
+const useGame = (pgn: PgnType) => {
+  const rootNode = 
   const [currentNode, setCurrentNode] = useState<NodeType>(currentPgn.gameProgress.currentNode);
   // const currentFen: string = currentNode.fen;
   const [currentFen, setCurrentFen] = useState<string>(currentNode.fen);

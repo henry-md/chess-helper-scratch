@@ -1,12 +1,4 @@
-# Key
-- "lastBranchingNode": the node which essentially represents the current line we're quizzing the user on. It's the first node to lead to only a single leaf node, and it's the last branching node along that line. It's the node that should be stored in our progress, to make sure we don't visit again.
 
-# Bugs
-- types are a bit off — use pgnBody inside pgn, and idk why pgn doesn't have isPublic attribute.
-
-# Todo next
-- Chess-app
-  - create
 
 # Todo later
 - Add the http request that happens in <Game> to a hook.
@@ -14,11 +6,9 @@
 # Todo laterr
 - maybe set up auto reformatting on save (look more into eslint)
 - set up best practice documentation for ai models to use to give better edits
-- migrate frontend to ts
-  https://www.typescriptlang.org/
-  https://tsx.is/
 - Can format the pgn text like Chess.com
   - Can allow clicking & navigating through that pgn text like chess.com. Can make separate explore tab.
+- Create monorepo structure to share types, pgn-parser.ts, etc.
 
 # Implementation ideas
 - For implementing use-game & save state:

@@ -1,10 +1,14 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 
-interface IUser extends Document {
-  _id: string;
+export interface IUser {
   email: string;
   username: string;
   passwordHash: string;
+}
+
+// Document adds properties like _id, createdAt, etc.
+export interface IUserDocument extends IUser, Document {
+  _id: Types.ObjectId;
   createdAt: Date;
 }
 
@@ -34,5 +38,4 @@ userSchema.pre("deleteOne", async function () {
   await mongoose.model("Pgn").deleteMany({ userId });
 });
 
-export const User = mongoose.model<IUser>("User", userSchema);
-export type { IUser };
+export const User = mongoose.model<IUserDocument>("User", userSchema);

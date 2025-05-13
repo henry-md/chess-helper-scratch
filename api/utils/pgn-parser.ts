@@ -1,6 +1,7 @@
 import { Chess } from 'chess.js';
+import { MoveNode } from '../types/chess';
 
-export const getFenBeforeFirstBranch = (pgn: string) => {
+export const getFenBeforeFirstBranch = (pgn: string): string => {
   const moves = pgn.split(/\s+/).filter(token => token.trim() !== '');
   const chess = new Chess();
   
@@ -12,4 +13,6 @@ export const getFenBeforeFirstBranch = (pgn: string) => {
   return chess.fen();
 };
 
-
+export const hashMoveNode = (moveNode: MoveNode): string => {
+  return `${moveNode.fen}-${moveNode.moveNum}-${moveNode.move}-${moveNode.isWhite}`;
+}

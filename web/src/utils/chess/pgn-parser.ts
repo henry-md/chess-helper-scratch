@@ -1,15 +1,6 @@
 import util from 'util';
 import { Chess } from 'chess.js';
-
-interface MoveNode {
-  move: string;
-  moveNum: number;
-  isWhite: boolean;
-  fen: string;
-  children: MoveNode[];
-  parent: MoveNode | null;
-  numLeafChildren: number;
-}
+import { MoveNode } from '@/types/chess';
 
 // Turns a nested pgn into a set of mainline pgns.
 export const moveTextToMainlines = (moveText: string) => {
@@ -167,4 +158,8 @@ if (typeof process !== 'undefined' && process.argv && import.meta.url === new UR
   const mainlines = moveTextToMainlines(moveText2);
   const moveTree = mainlinesToMoveTree(mainlines);
   console.log('move tree\n', prettyPrintMoveTree(moveTree, true));
+}
+
+export const hashMoveNode = (moveNode: MoveNode): string => {
+  return `${moveNode.fen}-${moveNode.moveNum}-${moveNode.move}-${moveNode.isWhite}`;
 }
