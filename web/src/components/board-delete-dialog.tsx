@@ -8,11 +8,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PgnType } from "@/lib/types";
+import { StoredPgn } from "@/lib/types";
 import useMutationPgns from "@/hooks/use-mutation-pgns";
 
 type DeletePgnDialogProps = {
-  pgn: PgnType;
+  pgn: StoredPgn;
   open: boolean;
   setDeleteDialogOpen: (open: boolean) => void;
 };

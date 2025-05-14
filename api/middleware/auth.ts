@@ -1,7 +1,9 @@
 import { verifyToken } from "../utils/jwt";
-import { IUser, User } from "../models/User";
+import { IUserDocument, User } from "../models/User";
 import logger from "../utils/logger";
 import { Request, Response, NextFunction } from 'express';
+import { serializeUser } from "../../web/src/lib/serializers";
+import { StoredUser } from "../../web/src/lib/types";
 
 export const auth = async (
   req: Request,
@@ -21,13 +23,14 @@ export const auth = async (
     return next();
   }
 
-  const user: IUser | null = await User.findById(decoded.userId);
+  const user: IUserDocument | null = await User.findById(decoded.userId);
   if (!user) {
     req.user = undefined;
     return next();
   }
 
   logger.debug(`[Auth]: User ${user.username} authenticated`);
-  req.user = user.toObject() as IUser;
+  const serializedUser: StoredUser = serializeUser(user);
+  req.user = serializedUser;
   return next();
 };

@@ -1,30 +1,30 @@
-export type UserType = {
-  _id: string;
-  username: string;
+
+/* Should match api/models/User.ts */
+export type IUser = {
   email: string;
+  username: string;
   passwordHash: string;
+}
+
+export type IUserDocument = IUser & {
+  _id: string;
+  createdAt: Date; // ISO
+}
+
+export type StoredUser = IUser & {
+  _id: string;
   createdAt: string; // ISO
 }
 
-export type NodeType = {
-  move: string;
-  moveNum: number;
-  isWhite: boolean;
-  fen: string;
-  numLeafChildren: number;
-  children: NodeType[];
-  parent: NodeType | null;
-}
-
-export type PgnType = {
-  _id: string;
+/* Should match api/models/Pgn.ts */
+export type IPgn = {
+  userId: string;
   title: string;
   moveText: string;
   notes: string;
   isPublic: boolean;
   gameProgress: {
-    visitedBranchingNodes: NodeType[];
-    currentNode: NodeType;
+    visitedNodeHashes: string[];
   };
   gameSettings: {
     isPlayingWhite: boolean;
@@ -33,6 +33,25 @@ export type PgnType = {
   gameMetadata: {
     fenBeforeFirstBranch: string;
   };
-  userId: string;
+}
+
+export type IPgnDocument = IPgn & {
+  _id: string; // Question: not mongoose.ObjectId?
   createdAt: Date;
+}
+
+export type StoredPgn = IPgn & {
+  _id: string;
+  createdAt: string; // ISO
+}
+
+/* Should match api/types/chess.ts */
+export interface MoveNode {
+  move: string;
+  moveNum: number;
+  isWhite: boolean;
+  fen: string;
+  children: MoveNode[];
+  parent: MoveNode | null;
+  numLeafChildren: number;
 }

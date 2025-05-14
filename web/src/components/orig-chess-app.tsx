@@ -364,7 +364,7 @@ import { moveTextToMainlines, findNumMovesToFirstBranch } from '../utils/chess/p
 import { cn } from '../lib/utils'
 import { NODE_ENV } from "@/env";
 import EditPgnDialog from './board-edit-dialog';
-import { PgnType } from '@/lib/types';
+import { IPgnDocument } from '@/lib/types';
 import { $pgnDict } from '../store/pgn';
 import { $currentPgnId } from '../store/game-core';
 
@@ -381,7 +381,7 @@ function ChessApp() {
   const isPlayingWhite = useStore($isPlayingWhite);
   const isSkipping = useStore($isSkipping);
   const mainlines = useStore($mainlines);
-  // const currentPgnObject: PgnType | null = useStore($currentPgnObject);
+  // const currentPgnObject: IPgnDocument | null = useStore($currentPgnObject);
   const numMovesToFirstBranch = useStore($numMovesToFirstBranch);
   
   const chessRef = useRef(new Chess());

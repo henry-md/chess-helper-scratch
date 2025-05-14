@@ -1,9 +1,9 @@
-import { User, IUser } from '../models/user';
+import { StoredUser } from '@/types/chess';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser | null;
+      user?: StoredUser | null;
     }
   }
 }

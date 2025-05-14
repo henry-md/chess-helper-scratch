@@ -5,10 +5,10 @@ import { Chessboard } from "react-chessboard";
 import EditPgnDialog from './board-edit-dialog';
 import DeletePgnDialog from './board-delete-dialog';
 import { useState } from 'react';
-import { PgnType } from '@/lib/types';
+import { StoredPgn } from '@/lib/types';
 
 interface BoardPreviewProps {
-  pgn: PgnType;
+  pgn: StoredPgn;
   gameTitle: string;
   isWhite: boolean;
 }

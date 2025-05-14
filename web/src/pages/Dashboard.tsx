@@ -6,10 +6,11 @@ import { $user } from "@/store/user";
 import { useEffect, useState } from "react";
 import useQueryPgns from "@/hooks/use-query-pgns";
 import AddPgnDialog from "@/components/board-add-dialog";
+import { StoredPgn } from "@/lib/types";
 
 const Dashboard = () => {
   const user = useStore($user);
-  const { pgnArray } = useQueryPgns();
+  const { pgnArray }: { pgnArray: StoredPgn[] } = useQueryPgns();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const handleNewStudy = async () => {
@@ -29,7 +30,7 @@ const Dashboard = () => {
         <h1 className="mx-auto mb-8 text-2xl font-bold text-center">My Studies</h1>
         <div className="grid grid-cols-1 gap-16 mx-auto sm:grid-cols-2 lg:grid-cols-3">
           {
-            Array.isArray(pgnArray) && pgnArray.map((pgn, index) => (
+            Array.isArray(pgnArray) && pgnArray.map((pgn: StoredPgn, index) => (
               <BoardPreview key={index} pgn={pgn} gameTitle={pgn.title} isWhite={index % 2 === 0} />
             ))
           }

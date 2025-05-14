@@ -1,4 +1,4 @@
-import { IUser, User } from "../models/User";
+import { IUserDocument, User } from "../models/User";
 import { hash, verify } from "@node-rs/argon2";
 import { Router, Request, Response, RequestHandler } from "express";
 import { generateToken, verifyToken } from "../utils/jwt";
@@ -26,18 +26,19 @@ const hashOptions = {
 router.post("/sign-up", (async (req: Request<{}, {}, SignUpBody>, res: Response) => {
   try {
     const { email, username, password } = req.body;
-    logger.debug(`[Sign Up] Attempting to create user with email: ${email}`);
-
     const passwordHash = await hash(password, hashOptions);
+    logger.debug(`[Sign Up] Attempting to create user with email: ${email}`);
     logger.debug("[Sign Up] Password hashed successfully");
 
-    const existingUser = await User.findOne({ email });
+    // Make sure user doesn't already exist
+    const existingUser: IUserDocument | null = await User.findOne({ email });
     if (existingUser) {
       logger.warn(`[Sign Up] User already exists with email: ${email}`);
       res.json({ message: "User already exists" });
     }
 
-    const user: IUser = await User.create({
+    // Create serialized user
+    const user: IUserDocument = await User.create({
       email,
       username,
       passwordHash,
@@ -45,7 +46,7 @@ router.post("/sign-up", (async (req: Request<{}, {}, SignUpBody>, res: Response)
     logger.info(`[Sign Up] User created successfully: ${user._id}`);
 
     // Generate JWT token
-    const token = generateToken(user._id);
+    const token: string = generateToken(user._id.toString());
     logger.debug("[Sign Up] JWT token generated");
 
     return res.json({
@@ -68,7 +69,7 @@ router.post("/sign-in", (async (req: Request, res: Response) => {
     const { email, password } = req.body;
     logger.debug(`[Sign In] Attempting to sign in with email: ${email}`);
 
-    const user = await User.findOne({ email });
+    const user: IUserDocument | null = await User.findOne({ email });
     if (!user) {
       logger.warn(`[Sign In] User not found with email: ${email}`);
       return res.status(401).json({
@@ -107,7 +108,7 @@ router.post("/sign-in", (async (req: Request, res: Response) => {
     logger.debug("[Sign In] Password verified successfully");
 
     // Generate JWT token
-    const token = generateToken(user._id);
+    const token = generateToken(user._id.toString());
     logger.debug("[Sign In] JWT token generated");
 
     logger.info(`[Sign In] User ${user._id} signed in successfully`);

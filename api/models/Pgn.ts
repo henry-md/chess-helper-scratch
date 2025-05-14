@@ -1,5 +1,6 @@
 import mongoose, { Document, Types } from "mongoose";
 
+/* Should match web/src/lib/types.ts */
 export interface IPgn {
   userId: string;
   title: string;
@@ -49,8 +50,7 @@ const pgnSchema = new mongoose.Schema({
     default: false,
   },
   gameProgress: {
-    visitedNodeHashes: [String],
-    currentNodeHash: String,
+    visitedNodeHashes: [String]
   },
   gameSettings: {
     isPlayingWhite: Boolean,

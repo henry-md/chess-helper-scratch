@@ -1,38 +1,38 @@
 import { persistentAtom } from "@nanostores/persistent";
-import { PgnType } from "@/lib/types";
-import { atom } from "nanostores";
+import { IPgnDocument, StoredPgn } from "@/lib/types";
 import logger from "@/utils/logger";
+import { serializePgn } from "@/lib/serializers";
 
-const defaultPgns: Record<string, PgnType> = {};
+// SHOULDN'T NEED ANY OF THIS EVENTUALLY
+const defaultPgnDict: Record<string, StoredPgn> = {};
 
-export const $pgnDict = persistentAtom<Record<string, PgnType>>("pgns:", defaultPgns, {
+export const $pgnDict = persistentAtom<Record<string, StoredPgn>>("pgns:", defaultPgnDict, {
   encode: JSON.stringify,
   decode: JSON.parse
 });
 
-export const setPgnDict = (pgns: PgnType[]) => {
+export const setPgnDict = (pgns: StoredPgn[]) => {
   // Convert array to dictionary
   const pgnDict = pgns.reduce((acc, pgn) => {
     acc[pgn._id] = pgn;
     return acc;
-  }, {} as Record<string, PgnType>);
+  }, {} as Record<string, StoredPgn>);
   $pgnDict.set(pgnDict);
 };
 
-export const addPgnDict = (pgn: PgnType) => {
-  const currentPgns = $pgnDict.get();
-  $pgnDict.set({ ...currentPgns, [pgn._id]: pgn });
+export const addPgnDict = (pgn: StoredPgn) => {
+  $pgnDict.set({ ...$pgnDict.get(), pgn });
 };
 
-export const updatePgnDict = (pgn: PgnType) => {
-  logger.info('[pgn.ts nano] Updating PGN:', pgn._id, pgn.title, pgn.moveText, pgn.notes);
+export const updatePgnDict = (pgn: StoredPgn) => {
+  logger.info('[pgn.ts nano] Updating PGN:', pgn);
   if ($pgnDict.get()[pgn._id]) {
     $pgnDict.set({ ...$pgnDict.get(), [pgn._id]: pgn });
   }
 };
 
 export const clearPgnDict = () => {
-  $pgnDict.set(defaultPgns);
+  $pgnDict.set(defaultPgnDict);
 };
 
 export const deletePgnFromDict = (pgnId: string) => {
@@ -40,4 +40,17 @@ export const deletePgnFromDict = (pgnId: string) => {
   const newState = { ...currentPgns };
   delete newState[pgnId];
   $pgnDict.set(newState);
+};
+
+export const $currentPgn = persistentAtom<StoredPgn | null>("currentPgn", null, {
+  encode: JSON.stringify,
+  decode: JSON.parse
+});
+
+export const setCurrentPgn = (pgn: StoredPgn) => {
+  $currentPgn.set(pgn);
+};
+
+export const clearCurrentPgn = () => {
+  $currentPgn.set(null);
 };

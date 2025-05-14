@@ -4,6 +4,8 @@ import { API_URL } from "@/env";
 import logger from "@/utils/logger";
 import { setIsAuthenticated } from "@/store/auth";
 import { getAuthHeader } from "@/utils/auth";
+import { IUser, IUserDocument, StoredUser } from "@/lib/types";
+import { serializeUser } from "@/lib/serializers";
 
 function useAuth() {
   const user = useStore($user);
@@ -119,9 +121,10 @@ function useAuth() {
         return false;
       }
       
-      const { user: validatedUser } = await response.json();
+      const data = await response.json();
+      const user: StoredUser = data.user;
       logger.debug("[Validate] Token validated successfully");
-      setUser(validatedUser);
+      setUser(user);
       setIsAuthenticated(true);
       return true;
     } catch (error) {

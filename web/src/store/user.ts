@@ -1,8 +1,7 @@
 import { persistentMap } from "@nanostores/persistent";
-import { UserType } from "@/lib/types";
+import { StoredUser } from "@/lib/types";
 
-// Default objects for deletion
-const defaultUser = {
+const defaultUser: StoredUser = {
   _id: "",
   username: "",
   email: "",
@@ -11,7 +10,7 @@ const defaultUser = {
 };
 
 export const $user = persistentMap("user:", defaultUser);
-export const setUser = (user: UserType) => {
+export const setUser = (user: StoredUser) => {
   $user.set(user);
 };
 export const clearUser = () => {

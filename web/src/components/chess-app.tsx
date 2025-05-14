@@ -6,11 +6,11 @@ import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 import { useStore } from '@nanostores/react'
 import { $isPlayingWhite, $isSkipping, setIsPlayingWhite, setIsSkipping } from '../store/chess-settings'
 import { $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/game-core'
-import { moveTextToMainlines, findNumMovesToFirstBranch } from '@chess-helper/shared'
+import { moveTextToMainlines, findNumMovesToFirstBranch } from '@/utils/chess/pgn-parser'
 import { cn } from '../lib/utils'
 import { NODE_ENV } from "@/env";
 import EditPgnDialog from './board-edit-dialog';
-import { PgnType } from '@/lib/types';
+import { StoredPgn } from '@/lib/types';
 import { $pgnDict } from '../store/pgn';
 import { $currentPgnId } from '../store/game-core';
 
@@ -28,7 +28,7 @@ function ChessApp() {
   const isPlayingWhite = useStore($isPlayingWhite);
   const isSkipping = useStore($isSkipping);
   const mainlines = useStore($mainlines);
-  // const currentPgnObject: PgnType | null = useStore($currentPgnObject);
+  // const currentPgnObject: IPgnDocument | null = useStore($currentPgnObject);
   const numMovesToFirstBranch = useStore($numMovesToFirstBranch);
   
   const chessRef = useRef(new Chess());

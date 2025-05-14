@@ -4,7 +4,7 @@ import { addPgnDict, updatePgnDict, deletePgnFromDict, $pgnDict } from "@/store/
 import { getAuthHeader } from "@/utils/auth";
 import logger from "@/utils/logger";
 import { formatError } from "@/utils/error";
-import { PgnType } from "@/lib/types";
+import { IPgn, StoredPgn } from "@/lib/types";
 
 function useMutationPgns() {
   const createPgn = async ({
@@ -68,8 +68,8 @@ function useMutationPgns() {
       });
       const res = await response.json();
       console.log('res', res);
-      const { pgn: updatedPgn }: { pgn: PgnType } = res;
-      updatePgnDict(updatedPgn);
+      const pgn: StoredPgn = res.pgn;
+      updatePgnDict(pgn);
       // triggerPgnsRefresh();
     } catch (error) {
       console.error(error);

@@ -2,11 +2,11 @@ import { useStore } from "@nanostores/react";
 import { $pgnDict } from "@/store/pgn";
 import { $currentPgnId, $currentLine, $currentLineIdx, setCurrentLineIdx } from "@/store/game-core";
 import { useEffect, useState, useCallback } from "react";
-import { NodeType, PgnType } from "@/lib/types";
+import { MoveNode, IPgnDocument } from "@/lib/types";
 
-const useGame = (pgn: PgnType) => {
+const useGame = (pgn: IPgnDocument) => {
   const rootNode = 
-  const [currentNode, setCurrentNode] = useState<NodeType>(currentPgn.gameProgress.currentNode);
+  const [currentNode, setCurrentNode] = useState<MoveNode>(currentPgn.gameProgress.currentNode);
   // const currentFen: string = currentNode.fen;
   const [currentFen, setCurrentFen] = useState<string>(currentNode.fen);
 

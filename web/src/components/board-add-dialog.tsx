@@ -11,10 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { PgnType } from "@/lib/types";
 import useMutationPgns from "@/hooks/use-mutation-pgns";
-// import { triggerPgnsRefresh } from "@/store/pgn";
-import logger from "@/utils/logger";
 
 type AddPgnDialogProps = {
   open: boolean;

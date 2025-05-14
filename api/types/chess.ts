@@ -1,5 +1,4 @@
-/* should match web/src/types/chess.ts */
-
+/* Should match web/src/lib/types.ts */
 export interface MoveNode {
   move: string;
   moveNum: number;

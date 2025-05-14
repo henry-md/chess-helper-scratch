@@ -26,3 +26,6 @@
 # Things I've done since last meeting
 - migrated backend to ts
 - migrated isPlayingWhite & thumbnail to backend from frontend, attached to each pgn object
+
+# Questions:
+marked // Question: 
