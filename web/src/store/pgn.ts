@@ -21,7 +21,7 @@ export const setPgnDict = (pgns: StoredPgn[]) => {
 };
 
 export const addPgnDict = (pgn: StoredPgn) => {
-  $pgnDict.set({ ...$pgnDict.get(), pgn });
+  $pgnDict.set({ ...$pgnDict.get(), [pgn._id]: pgn });
 };
 
 export const updatePgnDict = (pgn: StoredPgn) => {

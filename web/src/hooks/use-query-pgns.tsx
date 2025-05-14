@@ -8,6 +8,7 @@ import { API_URL } from "@/env";
 import { toast } from "react-toastify";
 import { getAuthHeader } from "@/utils/auth";
 import logger from "@/utils/logger";
+import { StoredPgn } from "@/lib/types";
 
 function useQueryPgns() {
   const pgnDict = useStore($pgnDict);
@@ -22,9 +23,11 @@ function useQueryPgns() {
         method: "GET",
         headers: getAuthHeader(),
       });
-      const { pgns: pgnsArray } = await response.json();
+      const data = await response.json();
+      const pgnsArray: StoredPgn[] = data.pgns;
       logger.debug('[useQueryPgns] Fetched PGNs:', pgnsArray);
       setPgnDict(pgnsArray);
+      logger.error('now pgnDict', pgnDict);
     } catch (error) {
       const errorMessage =
         (error as Error).message ?? "Please try again later!";

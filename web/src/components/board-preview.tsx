@@ -29,7 +29,7 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
 
   return (
     <a href={`/game/${pgn._id}`} target="_self" className="cursor-pointer">
-      <p className="pb-2 text-center">{gameTitle}</p>
+      <p className="pb-2 text-center">{pgn.title}</p>
       <div className="relative">
         {/* Edit and Delete buttons */}
         <div className="absolute top-[5px] right-[-35px] z-50 flex flex-col gap-4">
