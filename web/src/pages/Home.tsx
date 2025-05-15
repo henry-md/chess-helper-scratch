@@ -1,5 +1,5 @@
 import Navbar from "../components/navbar";
-import ChessApp from "../components/old-chess-app";
+import ChessApp from "../utils/old/old-chess-app";
 
 const Home = () => {
   return (

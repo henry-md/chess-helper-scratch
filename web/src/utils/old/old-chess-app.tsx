@@ -1,15 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import Board from "./board";
+import Board from "../../components/board";
 import { Chess, Move } from "chess.js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 import { useStore } from '@nanostores/react'
-import { $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/game-core'
-import { cn } from '../lib/utils'
+import { $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../../store/game-core'
+import { cn } from '../../lib/utils'
 import { NODE_ENV } from "@/env";
-import EditPgnDialog from './board-edit-dialog';
+import EditPgnDialog from '../../components/board-edit-dialog';
 import { StoredPgn } from '@/lib/types';
-import { $pgn } from '../store/pgn';
+import { $pgn } from '../../store/pgn';
+import { toast } from 'react-toastify';
 
 // Custom hooks for game state
 import useSkipping from '@/hooks/game/use-skipping';
@@ -135,10 +136,14 @@ function ChessApp() {
 
   const getNextGameIfEnded = useCallback(() => {
     if (currMoveIdxRef.current === movesRef.current.length - 1) {
-      lineIdxRef.current++;
-      loadNextGame();
+      if (lineIdxRef.current === mainlines.length - 1) {
+        toast.success("Game completed!");
+      } else {
+        lineIdxRef.current++;
+        loadNextGame();
+      }
     }
-  }, [loadNextGame]);
+  }, [loadNextGame, mainlines.length]);
 
   const onDrop = (sourceSquare, targetSquare) => {
     const chess = chessRef.current;

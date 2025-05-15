@@ -136,6 +136,14 @@ pgnRouter.patch(
         });
       }
 
+      // Reevaluate fenBeforeFirstBranch
+      if (req.body.moveText) {
+        req.body.gameMetadata = {
+          ...req.body.gameMetadata,
+          fenBeforeFirstBranch: getFenBeforeFirstBranch(req.body.moveText)
+        };
+      }
+
       // Update PGN (flatten to allow partial nested updates)
       const update: Record<string, any> = flatten(req.body);
       const updatedPgn: IPgnDocument | null = await Pgn.findByIdAndUpdate(

@@ -25,7 +25,10 @@
 
 # Things I've done since last meeting
 - migrated backend to ts
-- migrated isPlayingWhite & thumbnail to backend from frontend, attached to each pgn object
+  - rethought types in front and backend
+- remade backend with nodes
+- took game settings out into their own hooks
+- intelligent preview feaure
 
 # Questions:
 marked // Question: 
