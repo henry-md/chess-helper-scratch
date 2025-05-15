@@ -351,39 +351,41 @@
 
 
 
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Board from "./board";
 import { Chess } from "chess.js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 import { useStore } from '@nanostores/react'
-import { $isPlayingWhite, $isSkipping, setIsPlayingWhite, setIsSkipping } from '../store/chess-settings'
 import { $mainlines, setMainlines, $numMovesToFirstBranch, setNumMovesToFirstBranch } from '../store/game-core'
-import { moveTextToMainlines, findNumMovesToFirstBranch } from '../utils/chess/pgn-parser'
 import { cn } from '../lib/utils'
 import { NODE_ENV } from "@/env";
 import EditPgnDialog from './board-edit-dialog';
-import { IPgnDocument } from '@/lib/types';
+import { StoredPgn } from '@/lib/types';
 import { $pgnDict } from '../store/pgn';
-import { $currentPgnId } from '../store/game-core';
+
+// Custom hooks for game state
+import useSkipping from '@/hooks/game/use-skipping';
+import usePlayingColor from '@/hooks/game/use-playing-color';
 
 const debug = NODE_ENV === "development";
 
-function ChessApp() {
-  const pgnDict = useStore($pgnDict);
-  const currentPgnId = useStore($currentPgnId);
-  const currentPgnObject = pgnDict[currentPgnId];
+function ChessApp({ currentPgnId }: { currentPgnId: string }) {
   
+  const pgnDict = useStore($pgnDict);
+  const currentPgnObject: StoredPgn | undefined = pgnDict[currentPgnId];
+
+  // Game settings
+  const { isSkipping, setIsSkipping } = useSkipping(currentPgnObject);
+  const { isPlayingWhite, setIsPlayingWhite } = usePlayingColor(currentPgnObject);
+  
+  // Game state
   const [currFen, setCurrFen] = useState('');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   
-  const isPlayingWhite = useStore($isPlayingWhite);
-  const isSkipping = useStore($isSkipping);
+  // Game logic
   const mainlines = useStore($mainlines);
-  // const currentPgnObject: IPgnDocument | null = useStore($currentPgnObject);
   const numMovesToFirstBranch = useStore($numMovesToFirstBranch);
-  
   const chessRef = useRef(new Chess());
   const movesRef = useRef([]);
   const currMoveIdxRef = useRef(-1);
@@ -405,7 +407,7 @@ function ChessApp() {
   //   if (success) {
   //     // Reset the game with new PGN
   //     // setCurrentPgn(newPgn);
-  //     setMainlines(moveTextToMainlines(newPgn));
+  //     setMainlines(move(newPgn));
   //     setNumMovesToFirstBranch(findNumMovesToFirstBranch(newPgn));
       
   //     // Reset game state

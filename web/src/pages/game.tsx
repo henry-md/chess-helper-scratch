@@ -9,12 +9,20 @@ import { API_URL } from "@/env";
 import { getAuthHeader } from "@/utils/auth";
 import { findNumMovesToFirstBranch, moveTextToMainlines } from "@/utils/chess/pgn-parser";
 import { setCurrentPgnId } from "../store/game-core";
+import useSkipping from "@/hooks/game/use-skipping";
+import usePlayingColor from "@/hooks/game/use-playing-color";
 
 const Game = () => {
   const { id } = useParams();
   const pgnDict = useStore($pgnDict);
   const currentPgnObject = pgnDict && id ? pgnDict[id] : undefined;
+  
+  // Update game state
+  if (!currentPgnObject) return <div>Loading...</div>;
+  const { setIsSkipping } = useSkipping(currentPgnObject);
+  const { setIsPlayingWhite } = usePlayingColor(currentPgnObject);
 
+  // Load game & game state from id
   useEffect(() => {
     const fetchPgn = async () => {
       if (!id) return;
@@ -30,6 +38,8 @@ const Game = () => {
         console.log('pgn.moveText', pgn.moveText);
         setMainlines(moveTextToMainlines(pgn.moveText));
         setNumMovesToFirstBranch(findNumMovesToFirstBranch(pgn.moveText));
+        setIsSkipping(currentPgnObject.gameSettings.isSkipping);
+        setIsPlayingWhite(currentPgnObject.gameSettings.isPlayingWhite);
       }
     };
 
@@ -42,14 +52,14 @@ const Game = () => {
     };
   }, [id]);
 
-  if (!pgnDict || !currentPgnObject) {
+  if (!pgnDict || !currentPgnObject || !id) {
     return <div>Loading...</div>;
   }
 
   return (
     <>
       <Navbar />
-      <ChessApp />
+      <ChessApp currentPgnId={id} />
     </>
   );
 };

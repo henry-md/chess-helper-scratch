@@ -10,6 +10,9 @@ import {
 } from "../validators/pgn.validator";
 import { RequestHandler } from "express";
 import { getFenBeforeFirstBranch } from "../utils/pgn-parser";
+import { flatten } from 'flat';
+import { IPgnDocument } from "../models/Pgn";
+
 const pgnRouter = Router();
 
 pgnRouter.get("/test-pgn", async (req, res) => {
@@ -133,10 +136,20 @@ pgnRouter.patch(
         });
       }
 
-      // Update PGN
-      const updatedPgn = await Pgn.findByIdAndUpdate(id, req.body, {
-        new: true,
-      });
+      // Update PGN (flatten to allow partial nested updates)
+      const update: Record<string, any> = flatten(req.body);
+      const updatedPgn: IPgnDocument | null = await Pgn.findByIdAndUpdate(
+        id,
+        { $set: update },
+        {
+          new: true,
+        }
+      );
+
+      // Return message
+      if (!updatedPgn) {
+        return res.status(404).json({ message: "PGN update failed", success: false });
+      }
       res.status(200).json({
         message: "PGN updated successfully",
         success: true,

@@ -11,10 +11,10 @@ export const $isSkipping = persistentAtom<boolean>('chess-skip-to-branch:', fals
   decode: (value) => value === 'true'
 })
 
-export const setIsPlayingWhite = (value: boolean) => {
+export const setIsPlayingWhiteStore = (value: boolean) => {
   $isPlayingWhite.set(value)
 }
 
-export const setIsSkipping = (value: boolean) => {
+export const setIsSkippingStore = (value: boolean) => {
   $isSkipping.set(value)
 }

@@ -5,7 +5,6 @@ import { useEffect, useState, useCallback } from "react";
 import { MoveNode, IPgnDocument } from "@/lib/types";
 
 const useGame = (pgn: IPgnDocument) => {
-  const rootNode = 
   const [currentNode, setCurrentNode] = useState<MoveNode>(currentPgn.gameProgress.currentNode);
   // const currentFen: string = currentNode.fen;
   const [currentFen, setCurrentFen] = useState<string>(currentNode.fen);

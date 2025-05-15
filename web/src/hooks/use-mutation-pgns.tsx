@@ -6,6 +6,23 @@ import logger from "@/utils/logger";
 import { formatError } from "@/utils/error";
 import { IPgn, StoredPgn } from "@/lib/types";
 
+type PgnUpdate = {
+  title?: string;
+  moveText?: string;
+  notes?: string;
+  isPublic?: boolean;
+  gameSettings?: {
+    isPlayingWhite?: boolean;
+    isSkipping?: boolean;
+  };
+  gameMetadata?: {
+    fenBeforeFirstBranch?: string;
+  };
+  gameProgress?: {
+    visitedNodeHashes?: string[];
+  };
+};
+
 function useMutationPgns() {
   const createPgn = async ({
     title,
@@ -49,12 +66,7 @@ function useMutationPgns() {
 
   const updatePgnContent = async (
     pgnId: string,
-    updates: {
-      title?: string;
-      moveText?: string;
-      notes?: string;
-      isPublic?: boolean;
-    }
+    updates: PgnUpdate
   ) => {
     logger.debug(`[useMutationPgns] Updating PGN ${pgnId} with ${JSON.stringify(updates)}`);
     try {
