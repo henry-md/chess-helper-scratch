@@ -15,8 +15,8 @@ const Board = ({ currFen, onPieceDrop, isWhite }: BoardProps) => {
       position={currFen}
       onPieceDrop={onPieceDrop}
       boardOrientation={isWhite ? 'white' : 'black'}
-      customDarkSquareStyle={{ backgroundColor: '#769656' }}
-      customLightSquareStyle={{ backgroundColor: '#eeeed2' }}
+      customDarkSquareStyle={{ backgroundColor: 'var(--board-dark)' }}
+      customLightSquareStyle={{ backgroundColor: 'var(--board-light)' }}
       customBoardStyle={{
         borderRadius: '4px',
         // boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)'

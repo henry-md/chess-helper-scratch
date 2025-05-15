@@ -1,359 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Board from "./board";
-import { Chess } from "chess.js";
+import { Chess, Move } from "chess.js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons'
 import { useStore } from '@nanostores/react'
@@ -362,7 +9,7 @@ import { cn } from '../lib/utils'
 import { NODE_ENV } from "@/env";
 import EditPgnDialog from './board-edit-dialog';
 import { StoredPgn } from '@/lib/types';
-import { $pgnDict } from '../store/pgn';
+import { $pgn } from '../store/pgn';
 
 // Custom hooks for game state
 import useSkipping from '@/hooks/game/use-skipping';
@@ -370,14 +17,14 @@ import usePlayingColor from '@/hooks/game/use-playing-color';
 
 const debug = NODE_ENV === "development";
 
-function ChessApp({ currentPgnId }: { currentPgnId: string }) {
+function ChessApp() {
+  const pgn: StoredPgn | null = useStore($pgn);
   
-  const pgnDict = useStore($pgnDict);
-  const currentPgnObject: StoredPgn | undefined = pgnDict[currentPgnId];
+  if (!pgn) return <div>Loading...</div>;
 
   // Game settings
-  const { isSkipping, setIsSkipping } = useSkipping(currentPgnObject);
-  const { isPlayingWhite, setIsPlayingWhite } = usePlayingColor(currentPgnObject);
+  const { isSkipping, setIsSkipping } = useSkipping(pgn);
+  const { isPlayingWhite, setIsPlayingWhite } = usePlayingColor(pgn);
   
   // Game state
   const [currFen, setCurrFen] = useState('');
@@ -394,14 +41,14 @@ function ChessApp({ currentPgnId }: { currentPgnId: string }) {
 
   // const handleTextareaChange = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
   //   const newPgn = event.target.value;
-  //   if (!currentPgnObject) return;
+  //   if (!pgn) return;
 
   //   // Update the PGN in both database and store
   //   const success = await updateCurrentPgn(
-  //     currentPgnObject._id,
-  //     currentPgnObject.title,
+  //     pgn._id,
+  //     pgn.title,
   //     newPgn,
-  //     currentPgnObject.notes
+  //     pgn.notes
   //   );
 
   //   if (success) {
@@ -498,7 +145,7 @@ function ChessApp({ currentPgnId }: { currentPgnId: string }) {
 
     if (currMoveIdxRef.current < movesRef.current.length - 1) {
       const nextMove = movesRef.current[currMoveIdxRef.current + 1];
-      const moveAttempt = chess.move({
+      const moveAttempt: Move = chess.move({
         from: sourceSquare,
         to: targetSquare,
         promotion: 'q',
@@ -569,18 +216,18 @@ function ChessApp({ currentPgnId }: { currentPgnId: string }) {
             debug && "border border-blue-500"
           )}>
             <div className="flex flex-row items-center w-full gap-4 justify-left">
-              <h3 className="text-2xl">{currentPgnObject?.title}</h3>
+              <h3 className="text-2xl">{pgn?.title}</h3>
               <button onClick={() => setEditDialogOpen(true)}>
                 <i className="fa-regular fa-pen-to-square"></i>
               </button>
             </div>
             <textarea
-              value={currentPgnObject?.notes || ''}
+              value={pgn?.notes || ''}
               className="w-full p-2 border border-gray-300 rounded h-fit"
               placeholder="Type here..."
             />
             <textarea 
-              value={currentPgnObject?.moveText || ''}
+              value={pgn?.moveText || ''}
               className="flex-grow w-full h-full p-2 border border-gray-300 rounded"
               placeholder="Type here..."
             />
@@ -620,8 +267,8 @@ function ChessApp({ currentPgnId }: { currentPgnId: string }) {
           </button>
         </div>
       </div>
-      {currentPgnObject && (
-        <EditPgnDialog pgn={currentPgnObject} open={editDialogOpen} setEditDialogOpen={setEditDialogOpen} />
+      {pgn && (
+        <EditPgnDialog pgn={pgn} open={editDialogOpen} setEditDialogOpen={setEditDialogOpen} />
       )}
     </>
   );

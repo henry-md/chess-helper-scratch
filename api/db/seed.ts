@@ -96,7 +96,7 @@ async function seedExistingUsers(users: IUserDocument[]): Promise<void> {
       const pgn: IPgn = {
         userId: user._id.toString(),
         title: `Ruy Lopez ${pgn_i} by user ${user.username}`,
-        moveText: `1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 5. Bb3 Nf6 6. O-O *`,
+        moveText: `1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 5. Bb3 Nf6 6. O-O`,
         notes: `Notes ${pgn_i}`,
         isPublic: pgn_i == 1,
         gameProgress: {

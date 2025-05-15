@@ -3,10 +3,41 @@
   --board-light-brown: #f0d9b5;
   --board-green: #769656;
   --board-light-green: #eeeed2;
+  --board-dark: var(--board-brown);
+  --board-light: var(--board-light-brown);
 
+  --background-beige: rgb(255, 250, 237);
+  --background-beige-dark: rgba(255, 252, 250, 0.518);
+  --beige-outline: rgb(184, 167, 139);
+
+  --brown-text: rgb(76, 25, 0);
 }
 
 #root {
   margin: 0;
   padding: 0;
+}
+
+body {
+  background-color: var(--background-beige);
+}
+
+textarea, input {
+  background-color: var(--background-beige-dark);
+  border: 1px solid var(--beige-outline) !important;
+  color: var(--brown-text);
+}
+
+button.w-full {
+  background-color: var(--board-brown) !important;
+  border: none !important;
+}
+
+*:not(button, button *) {
+  color: var(--brown-text);
+}
+
+.icon-btn {
+  color: white !important;
+  background-color: var(--board-brown) !important;
 }

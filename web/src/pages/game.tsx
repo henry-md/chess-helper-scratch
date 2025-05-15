@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/navbar";
-import ChessApp from "../components/chess-app";
+import ChessApp from "../components/old-chess-app";
 import { useStore } from "@nanostores/react";
 import { $pgnDict, setPgn } from "../store/pgn";
 import { setMainlines, setNumMovesToFirstBranch } from "../store/game-core";
@@ -13,6 +13,7 @@ import useSkipping from "@/hooks/game/use-skipping";
 import usePlayingColor from "@/hooks/game/use-playing-color";
 import { setCurrentLine, setCurrentLineIdx } from "../store/game-core";
 import { StoredPgn } from "@/lib/types";
+import { setGameOver } from "../store/game-core";
 
 const Game = () => {
   const { id } = useParams();
@@ -38,7 +39,6 @@ const Game = () => {
         const data = await response.json();
         const pgn: StoredPgn = data.pgn;
         console.log('pgn', pgn);
-        console.log('pgn.moveText', pgn.moveText);
         setPgn(pgn);
         setMainlines(moveTextToMainlines(pgn.moveText));
         setNumMovesToFirstBranch(findNumMovesToFirstBranch(pgn.moveText));
@@ -46,7 +46,7 @@ const Game = () => {
         setIsPlayingWhite(currentPgnObject.gameSettings.isPlayingWhite);
         setCurrentLine([]);
         setCurrentLineIdx(0);
-        
+        setGameOver(false);
       }
     };
 

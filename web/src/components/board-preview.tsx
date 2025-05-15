@@ -35,12 +35,12 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
         <div className="absolute top-[5px] right-[-35px] z-50 flex flex-col gap-4">
           <button 
             onClick={handleEdit}
-            className="text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
+            className="icon-btn text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
               <FontAwesomeIcon className="w-[14px] h-[14px]" icon={faPenToSquare} />
           </button>
           <button 
             onClick={handleDelete}
-            className="text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
+            className="icon-btn text-white bg-gray-900 rounded-[100%] w-[30px] h-[30px] flex items-center justify-center">
               <FontAwesomeIcon className="w-[14px] h-[14px]" icon={faTrash} />
           </button>
         </div>
@@ -53,8 +53,8 @@ const BoardPreview = ({ pgn, gameTitle, isWhite }: BoardPreviewProps) => {
             arePiecesDraggable={false}
             position={pgn.gameMetadata?.fenBeforeFirstBranch ?? 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'}
             boardOrientation={pgn.gameSettings?.isPlayingWhite ?? true ? 'white' : 'black'}
-            customDarkSquareStyle={{ backgroundColor: '#769656' }}
-            customLightSquareStyle={{ backgroundColor: '#eeeed2' }}
+            customDarkSquareStyle={{ backgroundColor: 'var(--board-dark)' }}
+            customLightSquareStyle={{ backgroundColor: 'var(--board-light)' }}
             customBoardStyle={{
               borderRadius: '4px',
               // boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)'

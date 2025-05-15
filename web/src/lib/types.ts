@@ -49,7 +49,7 @@ export type StoredPgn = IPgn & {
 export interface MoveNode {
   move: string;
   moveNum: number;
-  isWhite: boolean;
+  isWhite: boolean; // Whether this move is played by white
   fen: string;
   children: MoveNode[];
   parent: MoveNode | null;

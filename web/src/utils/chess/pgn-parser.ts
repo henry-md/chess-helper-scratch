@@ -1,6 +1,16 @@
 import util from 'util';
 import { Chess } from 'chess.js';
-import { MoveNode } from '@/lib/types';
+
+// Question: how to import from types.ts?
+interface MoveNode {
+  move: string;
+  moveNum: number;
+  isWhite: boolean; // Whether this move is played by white
+  fen: string;
+  children: MoveNode[];
+  parent: MoveNode | null;
+  numLeafChildren: number;
+}
 
 // Turns a nested pgn into a set of mainline pgns.
 export const moveTextToMainlines = (moveText: string) => {
@@ -61,7 +71,7 @@ export const mainlinesToMoveTree = (mainlines: string[]): MoveNode => {
     move: '',
     moveNum: 0,
     isWhite: false,
-    fen: '',
+    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     children: [],
     parent: null,
     numLeafChildren: 0,
@@ -109,7 +119,6 @@ export const mainlinesToMoveTree = (mainlines: string[]): MoveNode => {
 export const findNumMovesToFirstBranch = (pgn: string) => {
   let numMoves = 0;
   const moves = pgn.split(/\s+/).filter(token => token.trim() !== '');
-  console.log('moves', moves);
   for (const move of moves) {
     // if the first character is a number, continue
     if (/[0-9]/.test(move[0])) continue;
@@ -148,7 +157,7 @@ if (typeof process !== 'undefined' && process.argv && import.meta.url === new UR
   const moveText = `
 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 
 ( 4... Nf6 5. O-O Nxe4 6. Re1 Nd6 ) 
-5. Bb3 Nf6 6. O-O *
+5. Bb3 Nf6 6. O-O
 `
   const moveText2 = `
 1. e4 

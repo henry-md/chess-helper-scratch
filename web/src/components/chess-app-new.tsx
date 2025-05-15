@@ -42,6 +42,7 @@ function ChessApp() {
   const chessRef: MutableRefObject<Chess> = useRef(new Chess());
   
   // Game logic
+  
   const [currentNode, setCurrentNode] = useState<MoveNode>(() => 
     mainlinesToMoveTree(moveTextToMainlines(pgn.moveText))
   );
@@ -128,7 +129,6 @@ function ChessApp() {
   }, [isUsersTurn, playComputerMove]);
 
   const loadNextGameOrEndScreen = useCallback(() => {
-    // If all of sentinalNode's children are visited, we're done
     if (currentNodeRef.current.children.every((child) => pgn.gameProgress.visitedNodeHashes.includes(hashMoveNode(child)))) {
       toast.success('You win!');
       setGameOver(true);
@@ -148,8 +148,6 @@ function ChessApp() {
         }, computerMoveDelay * (i + 1));
       }
     }
-    
-    // Play opponent's move if a move is available and it's their turn
     if (currentNodeRef.current.children.length > 0) {
       let isWhitesTurn = !currentNodeRef.current.isWhite;
       if (isWhitesTurn != isPlayingWhite) {
@@ -177,7 +175,7 @@ function ChessApp() {
     if (moveAttempt && currentNodeRef.current.children.find((child) => child.fen === chess.fen())) {
       // Make the move
       setCurrentFen(chess.fen());
-      setCurrentNode(currentNodeRef.current.children.find((child) => child.fen === chess.fen())!);
+      setCurrentNode(currentNodeRef.current.children.find((child) => child.fen === chess.fen()));
       
       playComputerMoveIfComputersTurn();
       if (currentNodeRef.current.children.length === 0) {
@@ -211,7 +209,7 @@ function ChessApp() {
         {/* Board */}
         <div style={{ width: 'min(80vh, 70vw)' }}>
           <Board
-            currFen={currentNodeRef.current.fen} 
+            currFen={currentNode.fen} 
             onPieceDrop={onDrop}
             isWhite={isPlayingWhite}
           />
