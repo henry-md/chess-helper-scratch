@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "../components/navbar";
 import ChessApp from "../components/chess-app";
 import { useStore } from "@nanostores/react";
-import { $pgnDict } from "../store/pgn";
+import { $pgnDict, setPgn } from "../store/pgn";
 import { setMainlines, setNumMovesToFirstBranch } from "../store/game-core";
 import { API_URL } from "@/env";
 import { getAuthHeader } from "@/utils/auth";
@@ -11,6 +11,8 @@ import { findNumMovesToFirstBranch, moveTextToMainlines } from "@/utils/chess/pg
 import { setCurrentPgnId } from "../store/game-core";
 import useSkipping from "@/hooks/game/use-skipping";
 import usePlayingColor from "@/hooks/game/use-playing-color";
+import { setCurrentLine, setCurrentLineIdx } from "../store/game-core";
+import { StoredPgn } from "@/lib/types";
 
 const Game = () => {
   const { id } = useParams();
@@ -33,13 +35,18 @@ const Game = () => {
         headers: getAuthHeader(),
       });
       if (response.ok) {
-        const { pgn } = await response.json();
+        const data = await response.json();
+        const pgn: StoredPgn = data.pgn;
         console.log('pgn', pgn);
         console.log('pgn.moveText', pgn.moveText);
+        setPgn(pgn);
         setMainlines(moveTextToMainlines(pgn.moveText));
         setNumMovesToFirstBranch(findNumMovesToFirstBranch(pgn.moveText));
         setIsSkipping(currentPgnObject.gameSettings.isSkipping);
         setIsPlayingWhite(currentPgnObject.gameSettings.isPlayingWhite);
+        setCurrentLine([]);
+        setCurrentLineIdx(0);
+        
       }
     };
 
@@ -52,14 +59,14 @@ const Game = () => {
     };
   }, [id]);
 
-  if (!pgnDict || !currentPgnObject || !id) {
+  if (!currentPgnObject) {
     return <div>Loading...</div>;
   }
 
   return (
     <>
       <Navbar />
-      <ChessApp currentPgnId={id} />
+      <ChessApp />
     </>
   );
 };

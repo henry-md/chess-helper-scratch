@@ -3,6 +3,18 @@ import { IPgnDocument, StoredPgn } from "@/lib/types";
 import logger from "@/utils/logger";
 import { serializePgn } from "@/lib/serializers";
 
+export const $pgn = persistentAtom<StoredPgn | null>("pgn", null, {
+  encode: JSON.stringify,
+  decode: JSON.parse
+});
+
+export const setPgn = (pgn: StoredPgn) => {
+  $pgn.set(pgn);
+};
+export const clearPgn = () => {
+  $pgn.set(null);
+};
+
 // SHOULDN'T NEED ANY OF THIS EVENTUALLY
 const defaultPgnDict: Record<string, StoredPgn> = {};
 

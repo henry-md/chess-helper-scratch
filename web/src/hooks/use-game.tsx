@@ -1,27 +1,22 @@
 import { useStore } from "@nanostores/react";
 import { $pgnDict } from "@/store/pgn";
-import { $currentPgnId, $currentLine, $currentLineIdx, setCurrentLineIdx } from "@/store/game-core";
+import { $currentLine, $currentLineIdx, setCurrentLineIdx } from "@/store/game-core";
 import { useEffect, useState, useCallback } from "react";
-import { MoveNode, IPgnDocument } from "@/lib/types";
+import { MoveNode, StoredPgn } from "@/lib/types";
+import { mainlinesToMoveTree, moveTextToMainlines } from "@/utils/chess/pgn-parser";
 
-const useGame = (pgn: IPgnDocument) => {
-  const [currentNode, setCurrentNode] = useState<MoveNode>(currentPgn.gameProgress.currentNode);
-  // const currentFen: string = currentNode.fen;
-  const [currentFen, setCurrentFen] = useState<string>(currentNode.fen);
+const useGame = (pgn: StoredPgn) => {
+  const [currentNode, setCurrentNode] = useState<MoveNode>(() => 
+    mainlinesToMoveTree(moveTextToMainlines(pgn.moveText))
+  );
 
   // Game history
   const currentLine: string[] = useStore($currentLine); // list of fen strings
   const currentLineIdx: number = useStore($currentLineIdx);
   
   // Game settings
-  const isPlayingWhite = currentPgn.gameSettings.isPlayingWhite;
-  const isSkipping = currentPgn.gameSettings.isSkipping;
-
-  // Let Nanostores be single source of truth for fen
-  useEffect(() => {
-    setCurrentNode(currentPgn.gameProgress.currentNode);
-    setCurrentFen(currentPgn.gameProgress.currentNode.fen);
-  }, [currentPgnId, currentPgn.gameProgress.currentNode]);
+  const isPlayingWhite = pgn.gameSettings.isPlayingWhite;
+  const isSkipping = pgn.gameSettings.isSkipping;
 
   // Can I put this in a callback?
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -59,10 +54,7 @@ const useGame = (pgn: IPgnDocument) => {
   }
 
   return {
-    currentNode,
-    currentFen,
-    currentLineIdx,
-    
+    fen: currentNode.fen,
   };
 }
 

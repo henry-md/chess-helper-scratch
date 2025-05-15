@@ -1,6 +1,6 @@
 import util from 'util';
 import { Chess } from 'chess.js';
-import { MoveNode } from '@/types/chess';
+import { MoveNode } from '@/lib/types';
 
 // Turns a nested pgn into a set of mainline pgns.
 export const moveTextToMainlines = (moveText: string) => {
@@ -56,7 +56,7 @@ export const moveTextToMainlines = (moveText: string) => {
  * @returns A MoveNode representing the root of the move tree. The root is a sentinel node (empty move) 
  *          with the actual game moves starting in its children. Each MoveNode contains:
  */
-const mainlinesToMoveTree = (mainlines: string[]) => {
+export const mainlinesToMoveTree = (mainlines: string[]): MoveNode => {
   const sentinalNode: MoveNode = {
     move: '',
     moveNum: 0,
